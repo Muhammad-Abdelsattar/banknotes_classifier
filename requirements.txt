@@ -1,4 +1,5 @@
 dvc
+dvc-gdrive
 albumentations==1.4.16
 lightning==2.4.0
 numpy==2.1.1

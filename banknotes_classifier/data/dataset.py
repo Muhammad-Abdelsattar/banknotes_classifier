@@ -24,7 +24,7 @@ class BanknotesDataset(Dataset):
 
     def sample(self, idx):
         img = cv2.imread(self.images_paths[idx])
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)/255
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         label = self.get_label_from_path(self.images_paths[idx])
         return img, torch.tensor(label, dtype=torch.int64)
 

@@ -71,7 +71,6 @@ class BanknotesClassifierModule(L.LightningModule):
         return self.shared_step(batch, batch_idx, 'train')
 
     def validation_step(self, batch, batch_idx):
-        self.eval()
         return self.shared_step(batch, batch_idx, 'valid')
 
     def train_dataloader(self):

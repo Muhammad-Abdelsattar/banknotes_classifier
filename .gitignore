@@ -1,5 +1,8 @@
 *.jpg
 test.ipynb
+creds.json
+test.json
+lightning_logs/
 */*.jpg
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -14,7 +14,7 @@ def train(config: dict):
     model = MobileNetClassifier(num_classes=14,pretrained_backbone=True)
     scorer = Scorer(num_classes=14)
     images = glob.glob(os.path.join(config["data"]["dataset_path"], "*", "*.jpg"))
-    train_images, valid_images = random_split(train_dataset, [0.8, 0.2])
+    train_images, valid_images = random_split(images, [0.8, 0.2])
     train_dataset = BanknotesDataset(images_paths=train_images, img_transforms=img_transforms)
     valid_dataset = BanknotesDataset(images_paths=valid_images, img_transforms=img_transforms)
     module = BanknotesClassifierModule(model=model,
@@ -23,7 +23,7 @@ def train(config: dict):
                                        train_dataset=train_dataset,
                                        valid_dataset=valid_dataset,
                                        scorer=scorer)
-    trainer = build_trainer(config["training"["trainer"]])
+    trainer = build_trainer(config["training"])
     trainer.fit(module)
     return
 

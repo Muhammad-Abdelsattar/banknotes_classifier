@@ -5,10 +5,15 @@ from banknotes_classifier.modeling.model import ExportReadyModel, MobileNetClass
 from banknotes_classifier.modeling.utils import export_model
 
 def export(config: dict):
-    ckpt_path = config["training"]["callbacks"]["ModellCheckpoint"]["dirpath"]
+    ckpt_path = os.path.join(config["training"]["callbacks"]["ModelCheckpoint"]["dirpath"], 
+                             config["training"]["callbacks"]["ModelCheckpoint"]["filename"])
+
     exported_model_path = config["export"]["model_path"]
-    state_dict = torch.load(ckpt_path)["state_dict"]
-    ckpt = BanknotesClassifierModule.load_from_checkpoint(ckpt_path,model=MobileNetClassifier(14,False),train_dataset=None,valid_dataset=None)
+    ckpt = BanknotesClassifierModule.load_from_checkpoint(ckpt_path,
+                                                          model=MobileNetClassifier(14,False),
+                                                          train_dataset=None,
+                                                          valid_dataset=None,
+                                                          scorer=None)
     model = ExportReadyModel(model=ckpt.model)
     export_model(model, exported_model_path)
 
@@ -17,7 +22,7 @@ if __name__ == "__main__":
     from omegaconf import OmegaConf
     from omegaconf.errors import OmegaConfBaseException
     from typing import Any
-
+    
     try:
         config: dict[str, Any] = OmegaConf.load("params.yaml")
         seed = config.get("random_seed", 42)

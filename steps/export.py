@@ -6,7 +6,7 @@ from banknotes_classifier.modeling.utils import export_model
 
 def export(config: dict):
     ckpt_path = os.path.join(config["training"]["callbacks"]["ModelCheckpoint"]["dirpath"], 
-                             config["training"]["callbacks"]["ModelCheckpoint"]["filename"])
+                             config["training"]["callbacks"]["ModelCheckpoint"]["filename"]+".ckpt")
 
     exported_model_path = config["export"]["model_path"]
     ckpt = BanknotesClassifierModule.load_from_checkpoint(ckpt_path,

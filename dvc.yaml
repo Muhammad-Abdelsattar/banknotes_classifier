@@ -1,12 +1,14 @@
 params:
-  - params.yaml
+- params.yaml
+- reports/params.yaml
 stages:
   prepare:
     cmd: unzip -o input/dataset.zip -d input/dataset
     deps:
     - input/dataset.zip
     outs:
-    - input/dataset
+    - input/dataset:
+        cache: false
   train:
     cmd: python -m steps.train
     deps:
@@ -15,25 +17,24 @@ stages:
     - banknotes_classifier/training
     - banknotes_classifier/data
     - input/dataset
-    params:
-    - training
     outs:
-    - artifacts/checkpoints/best_checkpoint.ckpt
-    - reports/metrics.yaml:
+    - artifacts/checkpoints/best-checkpoint.ckpt
+    - reports/metrics.json:
         cache: false
   export:
     cmd: python -m steps.export
     deps:
-      - steps/export.py
-      - artifacts/checkpoints/best_checkpoint.ckpt
+    - steps/export.py
+    - artifacts/checkpoints/best-checkpoint.ckpt
     outs:
-      - artifacts/model.onnx
+    - artifacts/model.onnx
 
 
   evaluate:
     cmd: echo "Not implemented yet"
-    deps:
-    outs:
 
-# metrics:
-# - reports/metrics
+metrics:
+- reports/metrics.json
+plots:
+- reports/plots/metrics:
+    x: step

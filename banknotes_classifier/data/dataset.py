@@ -6,7 +6,8 @@ from .augmentations import img_transforms
 
 
 class BanknotesDataset(Dataset):
-    def __init__(self, images_paths,
+    def __init__(self, 
+                 images_paths,
                  img_transforms=img_transforms,
                  ):
 

@@ -9,11 +9,11 @@ class Scorer:
         self.valid_scorers = {}
         self.train_scorers["training_acc"] = torchmetrics.Accuracy(
             task="multiclass", num_classes=num_classes)
-        self.valid_scorers["valdation_acc"] = torchmetrics.Accuracy(
+        self.valid_scorers["validation_acc"] = torchmetrics.Accuracy(
             task="multiclass", num_classes=num_classes)
         self.train_scorers["training_f1"] = torchmetrics.F1Score(
             task="multiclass", num_classes=num_classes)
-        self.valid_scorers["valdation_f1"] = torchmetrics.F1Score(
+        self.valid_scorers["validation_f1"] = torchmetrics.F1Score(
             task="multiclass", num_classes=num_classes)
 
     def get_training_scores(self, logits, labels):
@@ -50,3 +50,10 @@ class Scorer:
         for scorer_name,scorer in self.valid_scorers.items():
             scorer.reset()
         return
+
+
+def export_model(model, model_path, input_shape=(3, 240, 320)):
+    model.eval()
+    model.cpu()
+    dummy_input = torch.randn(1, *input_shape)
+    torch.onnx.export(model, dummy_input, model_path, dynamic_axes={"input": {0: "batch_size"}}, opset_version=11)

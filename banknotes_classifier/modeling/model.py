@@ -31,3 +31,21 @@ class Regnet400Classifier(BaseClassifier):
         regnet = models.regnet_y_400mf(pretrained=pretrained_backbone)
         regnet.fc = nn.Linear(in_features=regnet.fc.in_features,out_features=self.num_classes)
         return regnet
+
+
+class ExportReadyModel(nn.Module):
+    def __init__(self, model):
+        super().__init__()
+        self.model = model
+        self.softmax = nn.Softmax(dim=1)
+        self.mean = torch.tensor([0.485, 0.456, 0.406], dtype=torch.float32)
+        self.std = torch.tensor([0.229, 0.224, 0.225], dtype=torch.float32)
+    
+    def normalize_image(self,x):
+        x = x / 255.0
+        x = (x - self.mean[:, None, None]) / self.std[:, None, None]
+        return x
+
+    def forward(self,x):
+        self.normalize_image(x)
+        return self.softmax(self.model(x))

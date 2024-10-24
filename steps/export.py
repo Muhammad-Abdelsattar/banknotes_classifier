@@ -1,7 +1,7 @@
 import os
 import torch
 from banknotes_classifier.modeling.lit_module import BanknotesClassifierModule
-from banknotes_classifier.modeling.model import ExportReadyModel, MobileNetClassifier
+from banknotes_classifier.modeling.model import ExportReadyModel, MobileNetClassifier, Regnet400Classifier
 from banknotes_classifier.modeling.utils import export_model
 
 def export(config: dict):
@@ -10,7 +10,7 @@ def export(config: dict):
 
     exported_model_path = config["export"]["model_path"]
     ckpt = BanknotesClassifierModule.load_from_checkpoint(ckpt_path,
-                                                          model=MobileNetClassifier(14,False),
+                                                          model=Regnet400Classifier(14,False),
                                                           train_dataset=None,
                                                           valid_dataset=None,
                                                           scorer=None)

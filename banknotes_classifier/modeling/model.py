@@ -47,5 +47,5 @@ class ExportReadyModel(nn.Module):
         return x
 
     def forward(self,x):
-        self.normalize_image(x)
+        x = self.normalize_image(x)
         return self.softmax(self.model(x))

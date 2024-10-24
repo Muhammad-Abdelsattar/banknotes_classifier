@@ -1,0 +1,29 @@
+import numpy as np
+import cv2
+import onnxruntime as ort 
+
+
+class InferencePipeline:
+    def __init__(self, model_path):
+        self.model = ort.InferenceSession(model_path)
+        self.input_name = self.model.get_inputs()[0].name
+        self.output_name = self.model.get_outputs()[0].name
+
+    def __call__(self, image):
+        image = self._prepare_input(image)
+        output = self.predict(image)
+        return output.tolist()
+
+    def _prepare_input(self, image):
+        if image.shape[0] > image.shape[1]:
+            image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = cv2.resize(image, (320, 240))
+        image = image.astype(np.float32)
+        image = image.transpose(2, 0, 1)
+        image = np.expand_dims(image, axis=0)
+        return image
+
+    def predict(self, image):
+        output = self.model.run([self.output_name], {self.input_name: image})[0]
+        return output

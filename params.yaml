@@ -2,12 +2,12 @@ data:
   dataset_path: /teamspace/studios/this_studio/dataset
 
 training:
-  batch_size: 16
+  batch_size: 64
   lr: 0.0001
 
   trainer:
     accelerator: cpu
-    max_epochs: 1
+    max_epochs: 8
 
   callbacks:
     ModelCheckpoint:

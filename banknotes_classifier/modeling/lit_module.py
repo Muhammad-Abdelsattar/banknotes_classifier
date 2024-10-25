@@ -29,10 +29,7 @@ class BanknotesClassifierModule(L.LightningModule):
         self.valid_dataset = valid_dataset
         self.model = model
         self.scorer = scorer
-        for k,v in self.scorer.train_scorers.items():
-            v=v.to(device=self.device)
-        for k,v in self.scorer.valid_scorers.items():
-            v=v.to(device=self.device)
+        print(self.device)
         self.softmax = nn.Softmax(dim=1)
         self.save_hyperparameters(ignore=['model', 'train_dataset', 'valid_dataset', "scorer"])
         # self._log_hyperparams = False

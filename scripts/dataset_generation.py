@@ -139,12 +139,12 @@ def generate_dataset(dataset_path: str,
                      banknotes_path: str,
                      backgrounds_path: str,
                      images_per_class: int,
-                     img_height: int,
-                     img_width: int,
-                     banknote_height: int,
-                     banknote_width: int,
-                     upper_scale_bound: int,
-                     lower_scale_bound: int):
+                     img_height: float,
+                     img_width: float,
+                     banknote_height: float,
+                     banknote_width: float,
+                     upper_scale_bound: float,
+                     lower_scale_bound: float):
 
     banknote_transforms = A.Compose([
                                     A.RandomBrightnessContrast(p=0.3),

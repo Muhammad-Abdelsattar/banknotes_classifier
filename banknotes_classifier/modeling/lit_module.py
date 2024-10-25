@@ -29,9 +29,14 @@ class BanknotesClassifierModule(L.LightningModule):
         self.valid_dataset = valid_dataset
         self.model = model
         self.scorer = scorer
+        for k,v in self.scorer.train_scorers:
+            v=v.to(device=self.device)
+        for k,v in self.scorer.valid_scorers:
+            v=v.to(device=self.device)
         self.softmax = nn.Softmax(dim=1)
         self.save_hyperparameters(ignore=['model', 'train_dataset', 'valid_dataset', "scorer"])
         # self._log_hyperparams = False
+        
 
     def forward(self, x):
         return self.model(x)
@@ -58,14 +63,14 @@ class BanknotesClassifierModule(L.LightningModule):
             - to make it appear for each epoch : set on_epoch = True (default for training_epch_end() and validation and test funcs)
         """
         if (stage == 'train'):
-            scores = self.scorer.get_training_scores(outs.cpu(), labels)
+            scores = self.scorer.get_training_scores(outs, labels)
             self.log("training_acc", acc, prog_bar=True,
              on_step=True, on_epoch=True)
             self.log("training_loss", loss, prog_bar=True,
                      on_step=True, on_epoch=True)
 
         elif (stage == 'valid'):
-            self.scorer.update_validation_scores(outs.cpu(), labels)
+            self.scorer.update_validation_scores(outs, labels)
             # self.log("valid_acc", acc, prog_bar=True, on_epoch=True)
             self.log("valid_loss", loss, prog_bar=True, on_epoch=True)
 

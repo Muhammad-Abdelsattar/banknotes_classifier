@@ -7,7 +7,7 @@ stages:
     deps:
     - input/dataset.zip
     outs:
-    - input/dataset:
+    - input/dataset
   train:
     cmd: python -m steps.train
     deps:

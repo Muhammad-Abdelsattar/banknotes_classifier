@@ -28,7 +28,7 @@ class BanknotesClassifierModule(L.LightningModule):
         self.train_dataset = train_dataset
         self.valid_dataset = valid_dataset
         self.model = model
-        self.scorer = scorer
+        # self.scorer = scorer
         self.softmax = nn.Softmax(dim=1)
         self.save_hyperparameters(ignore=['model', 'train_dataset', 'valid_dataset', "scorer"])
         # self._log_hyperparams = False
@@ -59,16 +59,16 @@ class BanknotesClassifierModule(L.LightningModule):
             - to make it appear for each epoch : set on_epoch = True (default for training_epch_end() and validation and test funcs)
         """
         if (stage == 'train'):
-            scores = self.scorer.get_training_scores(outs, labels)
+            # scores = self.scorer.get_training_scores(outs, labels)
             self.log("training_acc", acc, prog_bar=True,
              on_step=True, on_epoch=True)
             self.log("training_loss", loss, prog_bar=True,
                      on_step=True, on_epoch=True)
 
         elif (stage == 'valid'):
-            self.scorer.update_validation_scores(outs, labels)
-            # self.log("valid_acc", acc, prog_bar=True, on_epoch=True)
-            self.log("valid_loss", loss, prog_bar=True, on_epoch=True)
+            # self.scorer.update_validation_scores(outs, labels)
+            self.log("valid_acc", acc, prog_bar=True, on_epoch=True, on_step=False)
+            self.log("valid_loss", loss, prog_bar=True, on_epoch=True, on_step=False)
 
         return loss
 
@@ -78,19 +78,19 @@ class BanknotesClassifierModule(L.LightningModule):
     def validation_step(self, batch, batch_idx):
         return self.shared_step(batch, batch_idx, 'valid')
 
-    def on_train_epoch_end(self) -> None:
-        scores = self.scorer.compute_epoch_training_scores()
-        self.log("training_f1", scores["training_f1"], prog_bar=True,
-                    on_step=False, on_epoch=True)
-        return super().on_train_epoch_end()
+    # def on_train_epoch_end(self) -> None:
+    #     scores = self.scorer.compute_epoch_training_scores()
+    #     self.log("training_f1", scores["training_f1"], prog_bar=True,
+    #                 on_step=False, on_epoch=True)
+    #     return super().on_train_epoch_end()
     
-    def on_validation_epoch_end(self) -> None:
-        scores = self.scorer.compute_epoch_validation_scores()
-        self.log("validation_acc", scores["validation_acc"], prog_bar=True, 
-                 on_epoch=True, on_step=False)
-        self.log("validation_f1", scores["validation_f1"], prog_bar=True,
-                 on_step=False, on_epoch=True)
-        return super().on_validation_epoch_end()
+    # def on_validation_epoch_end(self) -> None:
+    #     scores = self.scorer.compute_epoch_validation_scores()
+    #     self.log("validation_acc", scores["validation_acc"], prog_bar=True, 
+    #              on_epoch=True, on_step=False)
+    #     self.log("validation_f1", scores["validation_f1"], prog_bar=True,
+    #              on_step=False, on_epoch=True)
+    #     return super().on_validation_epoch_end()
 
     def train_dataloader(self):
         return DataLoader(dataset=self.train_dataset, shuffle=False, batch_size=self.batch_size)

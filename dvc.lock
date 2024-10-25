@@ -5,37 +5,37 @@ stages:
     deps:
     - path: input/dataset.zip
       hash: md5
-      md5: 163f92e2c440845bc81098ec9bc2bfbd
-      size: 646032889
+      md5: 9892488502d8777125f191bdbe10d892
+      size: 1118003838
     outs:
     - path: input/dataset
       hash: md5
-      md5: 1444df2552f64314cbb64ee3e6771414.dir
-      size: 647376163
-      nfiles: 21000
+      md5: 64310cb77ae7a81bc313de6b790af2a6.dir
+      size: 1120241838
+      nfiles: 35000
   train:
     cmd: python -m steps.train
     deps:
     - path: banknotes_classifier/data
       hash: md5
-      md5: 1ed06d3fbad7a443620258d965ee576e.dir
-      size: 3573
+      md5: dbbc99a7e6313c1b53daa02cf1726a29.dir
+      size: 3528
       nfiles: 6
     - path: banknotes_classifier/modeling
       hash: md5
-      md5: e1917d438fc7befb5f4f5424cf078467.dir
-      size: 16623
+      md5: ad450a77855358efe7bbbf0aa02a0bb5.dir
+      size: 15913
       nfiles: 8
     - path: banknotes_classifier/training
       hash: md5
-      md5: df96ce8dd7dd0820c9b02ffef6e58a19.dir
-      size: 2096
+      md5: ccf2b9022ed06dadc45ec2e8119dc6ad.dir
+      size: 2051
       nfiles: 6
     - path: input/dataset
       hash: md5
-      md5: 1444df2552f64314cbb64ee3e6771414.dir
-      size: 647376163
-      nfiles: 21000
+      md5: 64310cb77ae7a81bc313de6b790af2a6.dir
+      size: 1120241838
+      nfiles: 35000
     - path: steps/train.py
       hash: md5
       md5: cc52bc6ae3ce5ab6c9d40241683c1e92
@@ -43,19 +43,19 @@ stages:
     outs:
     - path: artifacts/checkpoints/best-checkpoint.ckpt
       hash: md5
-      md5: 7a9ffc5276faa412b0f4c303fc073c41
-      size: 47347046
+      md5: 724ed4e042355bd3072c98338b19f551
+      size: 47359398
     - path: reports/metrics.json
       hash: md5
-      md5: 3581966807cbfa1e8f0b3f4bbd54693e
-      size: 343
+      md5: 997c353777e6ab66ee10b7860ab19093
+      size: 286
   export:
     cmd: python -m steps.export
     deps:
     - path: artifacts/checkpoints/best-checkpoint.ckpt
       hash: md5
-      md5: 7a9ffc5276faa412b0f4c303fc073c41
-      size: 47347046
+      md5: 724ed4e042355bd3072c98338b19f551
+      size: 47359398
     - path: steps/export.py
       hash: md5
       md5: eed838f9bfffab3bd3dd9b8b4287cfdc
@@ -63,7 +63,7 @@ stages:
     outs:
     - path: artifacts/model.onnx
       hash: md5
-      md5: 1e5aababcd5b0f54989725de9faab363
+      md5: f43bbd46cc07d98d121fe09af8585462
       size: 15650853
   evaluate:
     cmd: echo "Not implemented yet"

@@ -8,7 +8,6 @@ stages:
     - input/dataset.zip
     outs:
     - input/dataset:
-        cache: false
   train:
     cmd: python -m steps.train
     deps:

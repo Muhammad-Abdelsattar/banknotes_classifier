@@ -1,0 +1,69 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: unzip -o input/dataset.zip -d input/dataset
+    deps:
+    - path: input/dataset.zip
+      hash: md5
+      md5: 163f92e2c440845bc81098ec9bc2bfbd
+      size: 646032889
+    outs:
+    - path: input/dataset
+      hash: md5
+      md5: 1444df2552f64314cbb64ee3e6771414.dir
+      size: 647376163
+      nfiles: 21000
+  train:
+    cmd: python -m steps.train
+    deps:
+    - path: banknotes_classifier/data
+      hash: md5
+      md5: 1ed06d3fbad7a443620258d965ee576e.dir
+      size: 3573
+      nfiles: 6
+    - path: banknotes_classifier/modeling
+      hash: md5
+      md5: e1917d438fc7befb5f4f5424cf078467.dir
+      size: 16623
+      nfiles: 8
+    - path: banknotes_classifier/training
+      hash: md5
+      md5: df96ce8dd7dd0820c9b02ffef6e58a19.dir
+      size: 2096
+      nfiles: 6
+    - path: input/dataset
+      hash: md5
+      md5: 1444df2552f64314cbb64ee3e6771414.dir
+      size: 647376163
+      nfiles: 21000
+    - path: steps/train.py
+      hash: md5
+      md5: cc52bc6ae3ce5ab6c9d40241683c1e92
+      size: 1981
+    outs:
+    - path: artifacts/checkpoints/best-checkpoint.ckpt
+      hash: md5
+      md5: 7a9ffc5276faa412b0f4c303fc073c41
+      size: 47347046
+    - path: reports/metrics.json
+      hash: md5
+      md5: 3581966807cbfa1e8f0b3f4bbd54693e
+      size: 343
+  export:
+    cmd: python -m steps.export
+    deps:
+    - path: artifacts/checkpoints/best-checkpoint.ckpt
+      hash: md5
+      md5: 7a9ffc5276faa412b0f4c303fc073c41
+      size: 47347046
+    - path: steps/export.py
+      hash: md5
+      md5: eed838f9bfffab3bd3dd9b8b4287cfdc
+      size: 1530
+    outs:
+    - path: artifacts/model.onnx
+      hash: md5
+      md5: 1e5aababcd5b0f54989725de9faab363
+      size: 15650853
+  evaluate:
+    cmd: echo "Not implemented yet"

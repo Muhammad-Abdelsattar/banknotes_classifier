@@ -133,46 +133,6 @@ def overlay(banknote,
 
     return resultant_img
 
-
-# def generate_dataset(dataset_path,
-#                      banknotes_vars_path,
-#                      banknotes_path,
-#                      backgrounds_paths,
-#                      upscale_factor,
-#                      img_size,
-#                      scales,
-#                      banknote_transforms,
-#                      banknote_mask_transforms):
-
-#     if not os.path.exists(dataset_path):
-#         os.mkdir(dataset_path)
-#     if not os.path.exists(banknotes_vars_path):
-#         os.mkdir(banknotes_vars_path)
-
-#     for folder in os.listdir(banknotes_path):
-#         files = glob.glob(os.path.join(banknotes_vars_path, folder, '*.jpg'))
-#         i = 0
-#         n = 0
-#         c = 0
-#         make_variations(banknotes_path, folder, banknotes_vars_path)
-#         class_dir = os.path.join(dataset_path, folder)
-#         if not os.path.exists(class_dir):
-#             os.mkdir(class_dir)
-#         for j in range(upscale_factor):
-#             for f in files:
-#                 if (i >= len(backgrounds_paths)):
-#                     i = 0
-
-#                 banknote = cv2.imread(f)
-#                 background = cv2.imread(os.path.join(backgrounds_paths[i]))
-#                 for scale in scales:
-#                     image = overlay(banknote, background, img_size, scale,
-#                                     banknote_transforms, banknote_mask_transforms)
-#                     cv2.imwrite(os.path.join(class_dir, str(n)+'.jpg'), image)
-#                     n += 1
-
-#                 i += 1
-
 @app.command()
 def generate_dataset(dataset_path: str,
                      banknotes_vars_path: str,

@@ -1,0 +1,12 @@
+{
+    "training_acc_step": 1.0,
+    "training_loss_step": 0.0016236065421253443,
+    "epoch": 7,
+    "step": 2103,
+    "valid_loss": 0.13513615727424622,
+    "validation_acc": 0.9626190662384033,
+    "validation_f1": 0.9626190662384033,
+    "training_acc_epoch": 1.0,
+    "training_loss_epoch": 0.0015138399321585894,
+    "training_f1": 1.0
+}

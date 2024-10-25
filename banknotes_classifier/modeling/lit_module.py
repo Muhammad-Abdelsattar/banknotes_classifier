@@ -58,14 +58,14 @@ class BanknotesClassifierModule(L.LightningModule):
             - to make it appear for each epoch : set on_epoch = True (default for training_epch_end() and validation and test funcs)
         """
         if (stage == 'train'):
-            scores = self.scorer.get_training_scores(outs, labels)
+            scores = self.scorer.get_training_scores(outs.cpu(), labels)
             self.log("training_acc", acc, prog_bar=True,
              on_step=True, on_epoch=True)
             self.log("training_loss", loss, prog_bar=True,
                      on_step=True, on_epoch=True)
 
         elif (stage == 'valid'):
-            self.scorer.update_validation_scores(outs, labels)
+            self.scorer.update_validation_scores(outs.cpu(), labels)
             # self.log("valid_acc", acc, prog_bar=True, on_epoch=True)
             self.log("valid_loss", loss, prog_bar=True, on_epoch=True)
 

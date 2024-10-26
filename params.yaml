@@ -2,12 +2,12 @@ data:
   dataset_path: input/dataset/dataset
 
 training:
-  batch_size: 256
-  lr: 2e-05
+  batch_size: 128
+  lr: 5e-05
 
   trainer:
     accelerator: auto
-    max_epochs: 12
+    max_epochs: 20
 
   callbacks:
     ModelCheckpoint:

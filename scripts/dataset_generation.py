@@ -125,7 +125,7 @@ def overlay(banknote,
         numpy.ndarray: The resulting image with the banknote overlaid on the background.
     """
 
-    background = cv2.resize(background, (img_size[1], img_size[0]),interpolation=cv2.INTER_AREA)
+    background = cv2.resize(background, (img_size[1], img_size[0]))
     banknote, mask = transform_mask_banknote(
         banknote_transforms, banknote_mask_transforms, banknote, img_size, banknote_size, scale)
 
@@ -139,10 +139,10 @@ def generate_dataset(dataset_path: str,
                      banknotes_path: str,
                      backgrounds_path: str,
                      images_per_class: int,
-                     img_height: float,
-                     img_width: float,
-                     banknote_height: float,
-                     banknote_width: float,
+                     img_height: int,
+                     img_width: int,
+                     banknote_height: int,
+                     banknote_width: int,
                      upper_scale_bound: float,
                      lower_scale_bound: float):
 

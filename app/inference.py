@@ -15,10 +15,7 @@ class InferencePipeline:
         return output.tolist()
 
     def _prepare_input(self, image):
-        if image.shape[0] > image.shape[1]:
-            image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        image = cv2.resize(image, (320, 240))
         image = image.astype(np.float32)
         image = image.transpose(2, 0, 1)
         image = np.expand_dims(image, axis=0)

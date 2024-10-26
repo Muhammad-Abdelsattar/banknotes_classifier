@@ -73,19 +73,19 @@ def transform_mask_banknote(banknote_pre_transforms,
     if (shape[0] < shape[1]):  # the banknote is horizontal
         if (shape[0]/shape[1] > 0.7):  # the banknote is half visible
             transformed_banknote = cv2.resize(
-                transformed_banknote, (half_banknote_size[1], half_banknote_size[0]))
+                transformed_banknote, (half_banknote_size[1], half_banknote_size[0]), interpolation=cv2.INTER_AREA)
         else:  # the banknote is fully visible
             transformed_banknote = cv2.resize(
-                transformed_banknote, (banknote_size[1], banknote_size[0]))
+                transformed_banknote, (banknote_size[1], banknote_size[0]), interpolation=cv2.INTER_AREA)
 
     else:  # the banknote is vertical
         if (shape[1]/shape[0] > 0.7):  # banknote is half visible
             transformed_banknote = cv2.resize(
-                transformed_banknote, (half_banknote_size[0], half_banknote_size[1]))
+                transformed_banknote, (half_banknote_size[0], half_banknote_size[1]), interpolation=cv2.INTER_AREA)
 
         else:  # the banknote is fully visible
             transformed_banknote = cv2.resize(
-                transformed_banknote, (banknote_size[0], banknote_size[1]))
+                transformed_banknote, (banknote_size[0], banknote_size[1]), interpolation=cv2.INTER_AREA)
 
     r_x = np.random.randint(img_shape[0]-transformed_banknote.shape[0])
     r_y = np.random.randint(img_shape[1]-transformed_banknote.shape[1])
@@ -125,7 +125,7 @@ def overlay(banknote,
         numpy.ndarray: The resulting image with the banknote overlaid on the background.
     """
 
-    background = cv2.resize(background, (img_size[1], img_size[0]))
+    background = cv2.resize(background, (img_size[1], img_size[0]),interpolation=cv2.INTER_AREA)
     banknote, mask = transform_mask_banknote(
         banknote_transforms, banknote_mask_transforms, banknote, img_size, banknote_size, scale)
 
@@ -153,7 +153,7 @@ def generate_dataset(dataset_path: str,
                                 ])
 
     banknote_mask_transforms = A.Compose([
-                                        A.Perspective(p=.35),
+                                        A.Perspective(p=.15),
                                         A.Rotate(p=.5,limit=20),])
     img_size = (img_height, img_width)
     banknote_size = (banknote_height, banknote_width)

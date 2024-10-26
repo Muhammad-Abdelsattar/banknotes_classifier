@@ -3,7 +3,7 @@ data:
 
 training:
   batch_size: 128
-  lr: 5e-05
+  lr: 3e-05
 
   trainer:
     accelerator: auto

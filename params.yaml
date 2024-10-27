@@ -27,3 +27,5 @@ training:
 export:
   model_path: artifacts/model.onnx
 
+evaluation:
+  test_dataset_path: input/test_dataset/test_dataset

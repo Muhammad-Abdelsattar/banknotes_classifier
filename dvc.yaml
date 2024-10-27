@@ -3,7 +3,7 @@ params:
 - reports/params.yaml
 stages:
   prepare:
-    cmd: 
+    cmd:
     - unzip -o input/dataset.zip -d input/dataset
     - unzip -o input/test_dataset.zip -d input/test_dataset
     deps:
@@ -37,10 +37,5 @@ stages:
     - artifacts/model.onnx
     - input/test_dataset
     outs:
-    -reports/evaluation.json:
-        cahce: false
-metrics:
-- reports/metrics.json
-plots:
-- reports/plots/metrics:
-    x: step
+    - reports/evaluation.json:
+        cache: false

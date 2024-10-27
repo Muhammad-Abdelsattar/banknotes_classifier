@@ -10,7 +10,7 @@ def collate_model_outputs(model_outs):
 
 def compute_accuracy(model_outs, labels):
     predictions, _ = collate_model_outputs(model_outs)
-    accuracy = np.mean(predictions == labels)
+    accuracy = np.mean(np.array(predictions) == np.array(labels)).item()
     return accuracy
 
 def compute_avg_score(model_outs):

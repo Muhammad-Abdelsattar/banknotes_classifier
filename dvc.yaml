@@ -3,7 +3,9 @@ params:
 - reports/params.yaml
 stages:
   prepare:
-    cmd: unzip -o input/dataset.zip -d input/dataset
+    cmd: 
+    - unzip -o input/dataset.zip -d input/dataset
+    - unzip -o input/test_dataset.zip -d input/test_dataset
     deps:
     - input/dataset.zip
     outs:
@@ -28,10 +30,15 @@ stages:
     outs:
     - artifacts/model.onnx
 
-
   evaluate:
-    cmd: echo "Not implemented yet"
-
+    cmd: python -m steps.evaluate
+    deps:
+    - steps/evaluate.py
+    - artifacts/model.onnx
+    - input/test_dataset
+    outs:
+    -reports/evaluation.json:
+        cahce: false
 metrics:
 - reports/metrics.json
 plots:

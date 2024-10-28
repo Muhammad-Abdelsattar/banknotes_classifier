@@ -1,0 +1,11 @@
+fastapi==0.111.0
+python-multipart==0.0.16
+uvicorn[standard]==0.30.1
+pydantic==2.6.1
+dvc==3.53.1
+dvc-gdrive
+numpy==1.26.0
+opencv_python==4.10.0.84
+opencv_python_headless==4.10.0.84
+onnxruntime==1.18.1
+typer==0.12.3

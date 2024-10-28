@@ -18,7 +18,7 @@ def evaluate(config: dict):
         model_outs.append(pipeline(image))
         labels.append(label)
     accuracy = compute_accuracy(model_outs, labels)
-    write_metric("accuracy", accuracy,"reports/metrics/evalluation.json")
+    write_metric("accuracy", accuracy,"reports/evaluation.json")
     
 
 if __name__ == "__main__":

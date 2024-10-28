@@ -2,6 +2,7 @@ import os
 import typer
 from fastapi import FastAPI, UploadFile, File, BackgroundTasks
 from fastapi.responses import JSONResponse
+from typing import Annotated
 import cv2
 import numpy as np
 from inference import InferencePipeline
@@ -9,7 +10,7 @@ from inference import InferencePipeline
 app = FastAPI()
 cli = typer.Typer()
 
-pipeline = InferencePipeline("model.onnx")
+pipeline = InferencePipeline("artifacts/model.onnx")
 
 async def log_request(image):
     logs_dir = "/teamspace/studios/this_studio/images_requests"
@@ -29,16 +30,14 @@ async def predict(background_tasks: BackgroundTasks, file: UploadFile = File(...
 
 
 @cli.command()
-def runserver(host: str, 
-              port: int,
-              workers: int,
-              gdrive_folder_id: str,
-              gdrive_service_account_file: str):
+def runserver(host: Annotated[str ,typer.Option()] = "0.0.0.0", 
+              port: Annotated[int ,typer.Option()] = 8000,
+              workers: Annotated[int ,typer.Option()] = 1):
     """
     Run the FastAPI server.
     """
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host=host, port=port, workers=workers)
 
 if __name__ == "__main__":
     cli()

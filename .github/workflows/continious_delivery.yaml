@@ -11,10 +11,6 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
           token: ${{ secrets.PAT }}
-      - name: Install dependencies
-        run: |
-          pip install --upgrade pip 
-          pip install -r ./requirements.txt
       - name: login to docker hub
         uses: docker/login-action@v3
         with:

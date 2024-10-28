@@ -1,0 +1,55 @@
+on:
+  push:
+    branches:
+      - "*"
+jobs:
+  job1:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: 
+          fetch-depth: 0
+          fetch-tags: true
+          token: ${{ secrets.PAT }}
+      - uses: "WyriHaximus/github-action-get-previous-tag@v1"
+        name: get_latest_tag
+        with:
+          prefix: 'banknotes_classifier@v'
+          fallback: '0'
+        id: get_tag
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip 
+          pip install -r ./requirements.txt
+      - name: configure dvc
+        run: |
+          echo -E '${{ secrets.GDRIVE_CREDENTIALS_DATA }}' > creds.json
+          dvc remote add -d -f myremote gdrive://1IdooJif1hoyvpqVNU8zjniOqhMus1Js4
+          dvc remote modify myremote gdrive_use_service_account true
+          dvc remote modify gdrive_acknowledge_abuse true 
+          dvc remote modify myremote --local gdrive_service_account_json_file_path creds.json 
+      - name: evaluate
+        run: |
+          dvc pull artifacts/model.onnx
+          dvc pull input/test_dataset.zip
+          unzip -o input/test_dataset.zip -d input/test_dataset
+          python -m steps.evaluate
+        shell: bash
+      - name: generate_tag
+        run: |
+          # bash ./run.sh
+          dvc metrics diff --targets evaluation.json --json --no-path -- master $GITHUB_REF_NAME >> diff.json
+          python .github/workflows/helpers/check.py
+          value=$(cat diff.txt)
+          if [ $value == "greater" ]
+          then
+            echo ${{ steps.get_tag.outputs.tag }} > latest_tag.txt
+            version_patch=$(grep -oE '[0-9]+$' latest_tag.txt)
+            TAG=banknotes_classifier@v$((version_patch+1))
+            git config user.name "GitHub Actions"
+            git config user.email "github-actions@users.noreply.github.com"
+            git tag $TAG
+            git push origin $TAG
+            echo $TAG
+          fi
+        shell: bash

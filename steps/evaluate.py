@@ -10,7 +10,6 @@ from banknotes_classifier.data.dataset import TestBanknotesDataset
 def evaluate(config: dict):
     pipeline = InferencePipeline(model_path=config["export"]["model_path"])
     test_dataset_path = config["evaluation"]["test_dataset_path"]
-    print(test_dataset_path)
     test_images = glob.glob(os.path.join(test_dataset_path, "*", "*.jpg"))
     test_dataset = TestBanknotesDataset(test_images)
     model_outs = []

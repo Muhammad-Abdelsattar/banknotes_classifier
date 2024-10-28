@@ -10,7 +10,7 @@ def export(config: dict):
 
     exported_model_path = config["export"]["model_path"]
     ckpt = BanknotesClassifierModule.load_from_checkpoint(ckpt_path,
-                                                          model=Regnet400Classifier(14,False),
+                                                          model=MobileNetClassifier(14,False),
                                                           train_dataset=None,
                                                           valid_dataset=None,
                                                           scorer=None)

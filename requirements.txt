@@ -2,7 +2,7 @@ dvc==3.53.1
 dvc-gdrive
 albumentations==1.4.16
 lightning==2.4.0
-numpy==2.1.1
+numpy==1.26.0
 opencv_python==4.10.0.84
 opencv_python_headless==4.10.0.84
 torch==2.4.1

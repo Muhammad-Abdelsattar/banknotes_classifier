@@ -43,7 +43,7 @@ jobs:
       - name: generate_tag
         run: |
           # bash ./run.sh
-          dvc metrics diff --targets reports/evaluation.json --json --no-path -- master >> diff.json
+          dvc metrics diff --targets reports/evaluation.json --all --json --no-path -- master >> diff.json
           python .github/workflows/helpers/check.py
           value=$(cat diff.txt)
           if [ $value == "greater" ]

@@ -38,7 +38,8 @@ jobs:
           HF_USERNAME: ${{ secrets.HF_USERNAME }}
         run: |
           # Define the Space name based on the input provided
-          SPACE_NAME="banknotes-classifier:v${{ steps.generate_image_tag.outputs.version }}"
+          SPACE_NAME="banknotes-classifier-V${{ steps.generate_image_tag.outputs.version }}"
+          echo $SPACE_NAME
           echo "SPACE_NAME=$SPACE_NAME" >> "$GITHUB_OUTPUT"
 
           # Create a new Hugging Face Space using the API

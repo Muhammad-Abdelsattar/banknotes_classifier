@@ -38,7 +38,7 @@ jobs:
           HF_USERNAME: ${{ secrets.HF_USERNAME }}
         run: |
           # Define the Space name based on the input provided
-          SPACE_NAME="banknotes-classifier-V${{ steps.generate_image_tag.outputs.version }}"
+          SPACE_NAME="banknotes-classifier-V${{ steps.generate_space_version.outputs.version }}"
           echo $SPACE_NAME
           echo "SPACE_NAME=$SPACE_NAME" >> "$GITHUB_OUTPUT"
 
@@ -59,9 +59,8 @@ jobs:
             git config user.name "GitHub Actions"
             git config user.email "github-actions@users.noreply.github.com"
             git clone ${{ steps.create_hf_space.outputs.REPO_URL }} hf_space
-            cd hf_space
-            echo FROM ${{ steps.generate_image_tag.outputs.image_tag }} > Dockerfile
-            echo 'ENTRYPOINT ["python", "main.py", "--host", "0.0.0.0", "--port", "7860"]' >> Dockerfile
+            echo FROM ${{ steps.generate_image_tag.outputs.image_tag }} > hf_space/Dockerfile
+            echo 'ENTRYPOINT ["python", "main.py", "--host", "0.0.0.0", "--port", "7860"]' >> hf_space/Dockerfile
             git add Dockerfile
             git commit -m "Added Dockerfile"
 

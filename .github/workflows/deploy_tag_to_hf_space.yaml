@@ -61,7 +61,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_USERNAME: ${{ secrets.HF_USERNAME }}
         run: |
-          mv artiffacts/ app/
+          mv artifacts/ app/
           python .github/workflows/helpers/hf_spaces.py upload-folder \
             --space-name ${{ steps.create_hf_space.outputs.SPACE_NAME }} \
             --folder-path app/ \

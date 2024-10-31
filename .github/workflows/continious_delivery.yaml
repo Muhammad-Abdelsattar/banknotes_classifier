@@ -53,3 +53,4 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ steps.generate_image_tag.outputs.image_tag }}
+  

@@ -15,16 +15,13 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10.12'
+
       - name: Install dependencies
         run: |
           pip install --upgrade pip 
           pip install -r ./requirements.txt
-      # - uses: "WyriHaximus/github-action-get-previous-tag@v1"
-      #   with:
-      #     prefix: 'banknotes_classifier@v'
-      #     fallback: '0'
-      #   id: get_tag
-      - id: generate_space_version
+
+      - id: generate_version
         shell: bash
         run: |
           echo ${{ github.ref_name }} > latest_tag.txt
@@ -39,37 +36,47 @@ jobs:
         run: |
           # Define the Space name based on the input provided
           SPACE_NAME="banknotes-classifier-V${{ steps.generate_space_version.outputs.version }}"
-          echo $SPACE_NAME
+          python helpers/hf_spaces.py create-space \
+            --space-name $SPACE_NAME \
+            --user-name $HF_USERNAME \
+            --token $HF_TOKEN \
+            --space-sdk docker
           echo "SPACE_NAME=$SPACE_NAME" >> "$GITHUB_OUTPUT"
 
-          # Create a new Hugging Face Space using the API
-          curl -X POST \
-            -H "Authorization: Bearer $HF_TOKEN" \
-            -H "Content-Type: application/json" \
-            -d "{\"name\":\"$SPACE_NAME\",\"private\":false,\"sdk\":\"docker\"}" \
-            https://huggingface.co/api/repos/create
-          REPO_URL="https://$HF_USERNAME:$HF_TOKEN@huggingface.co/spaces/$HF_USERNAME/$SPACE_NAME"
-          echo "REPO_URL=$REPO_URL" >> "$GITHUB_OUTPUT"
+      - name: configure dvc
+        run: |
+          echo -E '${{ secrets.GDRIVE_CREDENTIALS_DATA }}' > creds.json
+          cat creds.json
+          dvc remote add -d -f myremote gdrive://1IdooJif1hoyvpqVNU8zjniOqhMus1Js4
+          dvc remote modify myremote gdrive_use_service_account true
+          dvc remote modify myremote gdrive_acknowledge_abuse true 
+          dvc remote modify myremote --local gdrive_service_account_json_file_path creds.json 
 
-      - name: Create HF Space repo
+      - name: Download Model
+        run: |
+          dvc pull artifacts/model.onnx
+
+      - name: Upload App
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_USERNAME: ${{ secrets.HF_USERNAME }}
         run: |
-            git config user.name "GitHub Actions"
-            git config user.email "github-actions@users.noreply.github.com"
-            git clone ${{ steps.create_hf_space.outputs.REPO_URL }} hf_space
-            echo FROM ${{ steps.generate_image_tag.outputs.image_tag }} > hf_space/Dockerfile
-            echo 'ENTRYPOINT ["python", "main.py", "--host", "0.0.0.0", "--port", "7860"]' >> hf_space/Dockerfile
-            git add Dockerfile
-            git commit -m "Added Dockerfile"
+          mv -r artiffacts/ app/
+          python helpers/hf_spaces.py upload-folder \
+            --space-name ${{ steps.create_hf_space.outputs.SPACE_NAME }} \
+            --folder-path app/ \
+            --path-in-repo app/ \
+            --user-name $HF_USERNAME \
+            --token $HF_TOKEN \
 
-      - name: Set Hugging Face Repository as Remote and Push
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          HF_USERNAME: ${{ secrets.HF_USERNAME }}
-        run: |
-          cd hf_space
-          git remote add hf_space_remote ${{ steps.create_hf_space.outputs.REPO_URL }}
-          git branch -M main
-          git push hf_space_remote main
+          python helpers/hf_spaces.py create-space-dockerfile \
+            --from-file Dockerfile
+          
+          python helpers/hf_spaces.py upload-file \
+            --space-name ${{ steps.create_hf_space.outputs.SPACE_NAME }} \
+            --file-path Dockerfile \
+            --path-in-repo Dockerfile \
+            --user-name $HF_USERNAME \
+            --token $HF_TOKEN \
+
+

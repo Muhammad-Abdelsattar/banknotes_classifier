@@ -36,7 +36,7 @@ jobs:
         run: |
           # Define the Space name based on the input provided
           SPACE_NAME="banknotes-classifier-V${{ steps.generate_space_version.outputs.version }}"
-          python helpers/hf_spaces.py create-space \
+          python .github/workflows/helpers/hf_spaces.py create-space \
             --space-name $SPACE_NAME \
             --user-name $HF_USERNAME \
             --token $HF_TOKEN \
@@ -62,17 +62,17 @@ jobs:
           HF_USERNAME: ${{ secrets.HF_USERNAME }}
         run: |
           mv -r artiffacts/ app/
-          python helpers/hf_spaces.py upload-folder \
+          python .github/workflows/helpers/hf_spaces.py upload-folder \
             --space-name ${{ steps.create_hf_space.outputs.SPACE_NAME }} \
             --folder-path app/ \
             --path-in-repo app/ \
             --user-name $HF_USERNAME \
             --token $HF_TOKEN \
 
-          python helpers/hf_spaces.py create-space-dockerfile \
+          python .github/workflows/helpers/hf_spaces.py create-space-dockerfile \
             --from-file Dockerfile
           
-          python helpers/hf_spaces.py upload-file \
+          python .github/workflows/helpers/hf_spaces.py upload-file \
             --space-name ${{ steps.create_hf_space.outputs.SPACE_NAME }} \
             --file-path Dockerfile \
             --path-in-repo Dockerfile \

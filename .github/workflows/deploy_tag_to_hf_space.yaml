@@ -24,13 +24,12 @@ jobs:
       #     prefix: 'banknotes_classifier@v'
       #     fallback: '0'
       #   id: get_tag
-      - id: generate_image_tag
+      - id: generate_space_version
         shell: bash
         run: |
           echo ${{ github.ref_name }} > latest_tag.txt
           version=$(grep -oE '[0-9]+$' latest_tag.txt)
           echo "version=$((version))" >> "$GITHUB_OUTPUT"
-          echo "image_tag=muhammadabdalsattar/banknotes_classifier:v$((version))" >> "$GITHUB_OUTPUT"
 
       - name: Create New Hugging Face Space
         id: create_hf_space
@@ -39,7 +38,7 @@ jobs:
           HF_USERNAME: ${{ secrets.HF_USERNAME }}
         run: |
           # Define the Space name based on the input provided
-          SPACE_NAME="banknotes_classifier:v${{ steps.generate_image_tag.outputs.version }}"
+          SPACE_NAME="banknotes-classifier:v${{ steps.generate_image_tag.outputs.version }}"
           echo "SPACE_NAME=$SPACE_NAME" >> "$GITHUB_OUTPUT"
 
           # Create a new Hugging Face Space using the API

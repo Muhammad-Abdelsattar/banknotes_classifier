@@ -35,7 +35,7 @@ jobs:
           HF_USERNAME: ${{ secrets.HF_USERNAME }}
         run: |
           # Define the Space name based on the input provided
-          SPACE_NAME="banknotes-classifier-V${{ steps.generate_space_version.outputs.version }}"
+          SPACE_NAME="banknotes-classifier-V${{ steps.generate_version.outputs.version }}"
           python .github/workflows/helpers/hf_spaces.py create-space \
             --space-name $SPACE_NAME \
             --user-name $HF_USERNAME \
@@ -61,7 +61,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_USERNAME: ${{ secrets.HF_USERNAME }}
         run: |
-          mv -r artiffacts/ app/
+          mv artiffacts/ app/
           python .github/workflows/helpers/hf_spaces.py upload-folder \
             --space-name ${{ steps.create_hf_space.outputs.SPACE_NAME }} \
             --folder-path app/ \

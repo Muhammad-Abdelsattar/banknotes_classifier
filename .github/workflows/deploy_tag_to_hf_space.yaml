@@ -1,0 +1,76 @@
+on:
+  push:
+    tags:
+      - "banknotes_classifier@v*"
+jobs:
+  Deploy_to_HF_Space:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+        with: 
+          fetch-depth: 0
+          fetch-tags: true
+          token: ${{ secrets.PAT }}
+      - name: setup-python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10.12'
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip 
+          pip install -r ./requirements.txt
+      # - uses: "WyriHaximus/github-action-get-previous-tag@v1"
+      #   with:
+      #     prefix: 'banknotes_classifier@v'
+      #     fallback: '0'
+      #   id: get_tag
+      - id: generate_image_tag
+        shell: bash
+        run: |
+          echo ${{ github.ref_name }} > latest_tag.txt
+          version=$(grep -oE '[0-9]+$' latest_tag.txt)
+          echo "version=$((version))" >> "$GITHUB_OUTPUT"
+          echo "image_tag=muhammadabdalsattar/banknotes_classifier:v$((version))" >> "$GITHUB_OUTPUT"
+
+      - name: Create New Hugging Face Space
+        id: create_hf_space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_USER: ${{ secrets.HF_USERNAME }}
+        run: |
+          # Define the Space name based on the input provided
+          SPACE_NAME="banknotes_classifier:v${{ steps.generate_image_tag.outputs.version }}"
+          echo "SPACE_NAME=$SPACE_NAME" >> "$GITHUB_OUTPUT"
+
+          # Create a new Hugging Face Space using the API
+          curl -X POST \
+            -H "Authorization: Bearer $HF_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{\"name\":\"$SPACE_NAME\",\"private\":false,\"sdk\":\"docker\"}" \
+            https://huggingface.co/api/repos/create
+          REPO_URL="https://$HF_USERNAME:$HF_TOKEN@huggingface.co/spaces/$HF_USERNAME/$SPACE_NAME"
+          echo "REPO_URL=$REPO_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Create HF Space repo
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_USERNAME: ${{ secrets.HF_USERNAME }}
+        run: |
+            git config user.name "GitHub Actions"
+            git config user.email "github-actions@users.noreply.github.com"
+            git clone ${{ steps.create_hf_space.outputs.REPO_URL }} hf_space
+            cd hf_space
+            echo FROM ${{ steps.generate_image_tag.outputs.image_tag }} > Dockerfile
+            echo 'ENTRYPOINT ["python", "main.py", "--host", "0.0.0.0", "--port", "7860"]' >> Dockerfile
+            git add Dockerfile
+            git commit -m "Added Dockerfile"
+
+      - name: Set Hugging Face Repository as Remote and Push
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_USERNAME: ${{ secrets.HF_USERNAME }}
+        run: |
+          cd hf_space
+          git remote add hf_space_remote ${{ steps.create_hf_space.outputs.REPO_URL }}
+          git branch -M main
+          git push hf_space_remote main

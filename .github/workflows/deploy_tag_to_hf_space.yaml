@@ -36,7 +36,7 @@ jobs:
         id: create_hf_space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          HF_USER: ${{ secrets.HF_USERNAME }}
+          HF_USERNAME: ${{ secrets.HF_USERNAME }}
         run: |
           # Define the Space name based on the input provided
           SPACE_NAME="banknotes_classifier:v${{ steps.generate_image_tag.outputs.version }}"

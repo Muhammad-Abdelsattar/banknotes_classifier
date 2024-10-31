@@ -1,6 +1,5 @@
 FROM python:3.10-slim
 COPY app/ /app/
-COPY artifacts/ /app/artifacts/
 WORKDIR /app
 
 RUN python -m pip install --upgrade pip

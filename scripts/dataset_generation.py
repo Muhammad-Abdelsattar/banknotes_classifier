@@ -65,10 +65,11 @@ def transform_mask_banknote(banknote_pre_transforms,
 
     shape = transformed_banknote.shape
 
+    orig_banknote_size = (banknote_size[0], banknote_size[1])
     banknote_size = (
-        int(banknote_size[0] * scale), int(banknote_size[1] * scale))
+        int(orig_banknote_size[0] * scale), int(orig_banknote_size[1] * scale))
     half_banknote_size = (
-        int(banknote_size[0] * scale), int(banknote_size[1] / 2 * scale))
+        int(orig_banknote_size[0] * scale), int(orig_banknote_size[1] / 2 * scale))
 
     if (shape[0] < shape[1]):  # the banknote is horizontal
         if (shape[0]/shape[1] > 0.7):  # the banknote is half visible

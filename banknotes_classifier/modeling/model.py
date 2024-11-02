@@ -32,6 +32,12 @@ class Regnet400Classifier(BaseClassifier):
         regnet.fc = nn.Linear(in_features=regnet.fc.in_features,out_features=self.num_classes)
         return regnet
 
+class EfficientNetClassifier(BaseClassifier):
+    def _prepare_model(self,
+                       pretrained_backbone=True):
+        efficientnet = models.efficientnet_b0(pretrained=pretrained_backbone)
+        efficientnet.classifier[-1] = nn.Linear(in_features=efficientnet.classifier[-1].in_features,out_features=self.num_classes)
+        return efficientnet
 
 class ExportReadyModel(nn.Module):
     def __init__(self, model):

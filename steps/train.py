@@ -11,8 +11,9 @@ from banknotes_classifier.data.augmentations import img_transforms
 
 
 def train(config: dict):
-    model = MobileNetClassifier(num_classes=14,pretrained_backbone=True)
+    # model = MobileNetClassifier(num_classes=14,pretrained_backbone=True)
     # model = Regnet400Classifier(num_classes=14,pretrained_backbone=True)
+    model = EfficientNetClassifier(num_classes=14,pretrained_backbone=True)
     scorer = Scorer(num_classes=14)
     images = glob.glob(os.path.join(config["data"]["dataset_path"], "*", "*.jpg"))
     train_images, valid_images = random_split(images, [0.8, 0.2])

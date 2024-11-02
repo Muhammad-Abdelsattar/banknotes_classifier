@@ -52,8 +52,16 @@ class Scorer:
         return
 
 
-def export_model(model, model_path, input_shape=(3, 240, 320)):
+def export_model(model, model_path, input_shape=(3, 240, 320), dynamic_height_and_width=True):
     model.eval()
     model.cpu()
     dummy_input = torch.randn(1, *input_shape)
-    torch.onnx.export(model, dummy_input, model_path, dynamic_axes={"input": {0: "batch_size"}}, opset_version=11)
+    if (dynamic_height_and_width):
+        dynamic_axes = {"input": {0: "batch_size",2: "dim_1", 3: "dim_2"}}
+    else:
+        dynamic_axes = {"input": {0: "batch_size"}}
+    torch.onnx.export(model,
+                      dummy_input,
+                      model_path,
+                      dynamic_axes=dynamic_axes,
+                      opset_version=11)

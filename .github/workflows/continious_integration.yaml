@@ -2,73 +2,13 @@ on:
   push:
     branches:
       - "*"
-jobs:
-  CI:
-    runs-on: self-hosted
-    steps:
-      - uses: actions/checkout@v4
-        with: 
-          fetch-depth: 0
-          fetch-tags: true
-          token: ${{ secrets.PAT }}
-      - name: setup-python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10.12'
-      - uses: "WyriHaximus/github-action-get-previous-tag@v1"
-        name: get_latest_tag
-        with:
-          prefix: 'banknotes_classifier@v'
-          fallback: '0'
-        id: get_tag
-      - name: Install dependencies
-        run: |
-          pip install --upgrade pip 
-          pip install -r ./requirements.txt
-      - name: configure dvc
-        run: |
-          echo -E '${{ secrets.GDRIVE_CREDENTIALS_DATA }}' > creds.json
-          cat creds.json
-          dvc remote add -d -f myremote gdrive://1IdooJif1hoyvpqVNU8zjniOqhMus1Js4
-          dvc remote modify myremote gdrive_use_service_account true
-          dvc remote modify myremote gdrive_acknowledge_abuse true 
-          dvc remote modify myremote --local gdrive_service_account_json_file_path creds.json 
-      - name: evaluate
-        run: |
-          dvc pull artifacts/model.onnx
-          dvc pull input/test_dataset.zip
-          unzip -o input/test_dataset.zip -d input/test_dataset
-          python -m steps.evaluate
-        shell: bash
-      - name: generate_tag
-        run: |
-          # bash ./run.sh
-          dvc metrics diff --targets reports/evaluation.json --all --json --no-path -- master >> diff.json
-          python .github/workflows/helpers/check.py
-          value=$(cat diff.txt)
-          if [ $value == "greater" ]
-          then
-            echo ${{ steps.get_tag.outputs.tag }} > latest_tag.txt
-            version_patch=$(grep -oE '[0-9]+$' latest_tag.txt)
-            TAG=banknotes_classifier@v$((version_patch+1))
-            git config user.name "GitHub Actions"
-            git config user.email "github-actions@users.noreply.github.com"
-            git tag $TAG
-            git push origin $TAG
-            echo $TAG
-          fi
-        shell: bash
-on:
-  push:
-    branches:
-      - "*"
 
 jobs:
   CI:
     runs-on: self-hosted
     env:
       PYTHON_VERSION: '3.10.12'
-      TAG_PREFIX: 'banknotes_classifier@v'
+      # TAG_PREFIX: 'banknotes_classifier@v'
 
     steps:
       # Step 1: Checkout code with full history and tags
@@ -118,10 +58,10 @@ jobs:
           # Determine if the metric is "greater" (indicating improvement)
           if [[ $(< diff.txt) == "greater" ]]; then
             # Get the latest tag and increment the version
-            latest_tag=$(git describe --tags $(git rev-list --tags --max-count=1))
+            latest_tag=$(git tag --sort=-v:refname | grep '^banknotes_classifier@' | head -n 1)
             latest_version=$(echo "$latest_tag" | grep -oE '[0-9]+$')
             new_version=$((latest_version + 1))
-            new_tag="${{ env.TAG_PREFIX }}${new_version}"
+            new_tag="banknotes_classifier@v${new_version}"
             
             # Tag and push the new version
             git config user.name "GitHub Actions"

@@ -4,8 +4,8 @@ params:
 stages:
   prepare:
     cmd:
-    - unzip -o input/dataset.zip -d input/dataset
-    - unzip -o input/test_dataset.zip -d input/test_dataset
+    - unzip -o input/dataset.zip -d input/dataset > /dev/null 2>&1
+    - unzip -o input/test_dataset.zip -d input/test_dataset > /dev/null 2>&1
     deps:
     - input/dataset.zip
     outs:

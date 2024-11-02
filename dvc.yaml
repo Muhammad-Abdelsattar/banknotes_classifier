@@ -39,3 +39,8 @@ stages:
     outs:
     - reports/evaluation.json:
         cache: false
+metrics:
+- reports/metrics.json
+plots:
+- reports/plots/metrics:
+    x: step

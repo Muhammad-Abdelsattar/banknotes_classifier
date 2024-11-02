@@ -48,7 +48,7 @@ jobs:
       # Step 6: Configure DVC for Google Drive remote
       - name: Configure DVC
         run: |
-          echo "${{ secrets.GDRIVE_CREDENTIALS_DATA }}" > creds.json
+          echo -E '${{ secrets.GDRIVE_CREDENTIALS_DATA }}' > creds.json
           dvc remote add -d -f myremote gdrive://1IdooJif1hoyvpqVNU8zjniOqhMus1Js4
           dvc remote modify myremote gdrive_use_service_account true
           dvc remote modify myremote gdrive_acknowledge_abuse true

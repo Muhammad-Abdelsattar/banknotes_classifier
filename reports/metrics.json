@@ -1,10 +1,10 @@
 {
-    "training_acc_step": 1.0,
-    "training_loss_step": 0.00024763320107012987,
-    "epoch": 4,
-    "step": 2624,
-    "valid_acc": 0.9998809695243835,
-    "valid_loss": 0.000578872743062675,
-    "training_acc_epoch": 0.9996428489685059,
-    "training_loss_epoch": 0.001488919253461063
+    "training_acc_step": 0.9375,
+    "training_loss_step": 0.16088390350341797,
+    "epoch": 2,
+    "step": 2519,
+    "valid_acc": 0.9997023940086365,
+    "valid_loss": 0.001348411082290113,
+    "training_acc_epoch": 0.9992559552192688,
+    "training_loss_epoch": 0.005981852766126394
 }

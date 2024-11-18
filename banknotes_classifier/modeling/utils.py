@@ -52,7 +52,7 @@ class Scorer:
         return
 
 
-def export_model(model, model_path, input_shape=(3, 240, 320), dynamic_height_and_width=True):
+def export_model(model, model_path, input_shape=(3, 480, 640), dynamic_height_and_width=True):
     model.eval()
     model.cpu()
     dummy_input = torch.randn(1, *input_shape)

@@ -23,7 +23,7 @@ async def predict(file: UploadFile = File(...)) :
     image = cv2.imdecode(np.frombuffer(image, np.uint8), cv2.IMREAD_COLOR)
     if image.shape[0] > image.shape[1]:
         image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
-    image = cv2.resize(image, (320, 240), interpolation=cv2.INTER_AREA)
+    image = cv2.resize(image, (640, 480), interpolation=cv2.INTER_AREA)
     # background_tasks.add_task(log_request, image)
     output = pipeline(image)
     return JSONResponse(content={"prediction": output})

@@ -40,7 +40,7 @@ jobs:
             --space-name $SPACE_NAME \
             --user-name $HF_USERNAME \
             --token $HF_TOKEN \
-            --space-sdk docker
+            --space-sdk gradio
           echo "SPACE_NAME=$SPACE_NAME" >> "$GITHUB_OUTPUT"
 
       - name: configure dvc

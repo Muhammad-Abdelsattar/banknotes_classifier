@@ -60,6 +60,7 @@ def export_model(model, model_path, input_shape=(3, 240, 320), dynamic_height_an
         dynamic_axes = {"input": {0: "batch_size",2: "dim_1", 3: "dim_2"}}
     else:
         dynamic_axes = {"input": {0: "batch_size"}}
+    print(dynamic_axes)
     torch.onnx.export(model,
                       dummy_input,
                       model_path,

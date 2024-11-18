@@ -61,22 +61,22 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_USERNAME: ${{ secrets.HF_USERNAME }}
         run: |
-          mv artifacts/ app/
+          cp -r artifacts/ demo_app/
           python .github/workflows/helpers/hf_spaces.py upload-folder \
             --space-name ${{ steps.create_hf_space.outputs.SPACE_NAME }} \
-            --folder-path app/ \
-            --path-in-repo app/ \
+            --folder-path demo_app/ \
+            --path-in-repo . \
             --user-name $HF_USERNAME \
             --token $HF_TOKEN \
 
-          python .github/workflows/helpers/hf_spaces.py create-space-dockerfile \
-            --from-file Dockerfile
+          # python .github/workflows/helpers/hf_spaces.py create-space-dockerfile \
+          #   --from-file Dockerfile
           
-          python .github/workflows/helpers/hf_spaces.py upload-file \
-            --space-name ${{ steps.create_hf_space.outputs.SPACE_NAME }} \
-            --file-path Dockerfile \
-            --path-in-repo Dockerfile \
-            --user-name $HF_USERNAME \
-            --token $HF_TOKEN \
+          # python .github/workflows/helpers/hf_spaces.py upload-file \
+          #   --space-name ${{ steps.create_hf_space.outputs.SPACE_NAME }} \
+          #   --file-path Dockerfile \
+          #   --path-in-repo Dockerfile \
+          #   --user-name $HF_USERNAME \
+          #   --token $HF_TOKEN \
 
 

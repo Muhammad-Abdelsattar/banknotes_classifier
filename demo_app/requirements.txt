@@ -1,0 +1,5 @@
+dvc==3.53.1
+dvc-gdrive
+numpy==1.26.0
+opencv_python_headless==4.10.0.84
+onnxruntime==1.18.1

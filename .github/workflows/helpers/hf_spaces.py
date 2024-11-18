@@ -11,7 +11,7 @@ api = HfApi()
 def create_space(space_name: Annotated[str,Option()],
                  user_name: Annotated[str,Option()],
                  token: Annotated[str,Option()],
-                 space_sdk: Annotated[str,Option()] = "docker"):
+                 space_sdk: Annotated[str,Option()] = "gradio"):
     try:
         print(f"Creating space {space_name}")
         api.create_repo(repo_id=os.path.join(user_name,space_name),
@@ -21,6 +21,7 @@ def create_space(space_name: Annotated[str,Option()],
         print(f"Space {space_name} created")
     except:
         print(f"Space {space_name} already exists")
+        raise Exception("Space already exists")
 
 
 @cli.command()
@@ -56,15 +57,16 @@ def upload_folder(folder_path: Annotated[str,Option()],
         print(f"Directory {folder_path} uploaded to {path_in_repo}")
     except:
         print(f"Directory wasn't uploaded. An Error occured.")
+        raise Exception("Directory wasn't uploaded. An Error occured.")
 
-@cli.command()
-def create_space_dockerfile(from_file: Annotated[str,Option()],):
-    with open(from_file, "r") as f:
-        dockerfile_lines = f.readlines()
-    dockerfile_lines[-1] = 'ENTRYPOINT [ "python", "main.py", "--host", "0.0.0.0", "--port", "7860", "--workers", "1"]'
+# @cli.command()
+# def create_space_dockerfile(from_file: Annotated[str,Option()],):
+#     with open(from_file, "r") as f:
+#         dockerfile_lines = f.readlines()
+#     dockerfile_lines[-1] = 'ENTRYPOINT [ "python", "main.py", "--host", "0.0.0.0", "--port", "7860", "--workers", "1"]'
 
-    with open("Dockerfile", "w") as f:
-        f.writelines(dockerfile_lines)
+#     with open("Dockerfile", "w") as f:
+#         f.writelines(dockerfile_lines)
 
 if __name__ == "__main__":
     cli()

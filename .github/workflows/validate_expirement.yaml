@@ -63,7 +63,6 @@ jobs:
     
     - name: register experiment
       if: ${{ steps.compare_metrics.outputs.diff}} == 'acceptable' 
-      shell: bash
       run: |
         BRANCH_NAME="${GITHUB_REF#refs/heads/}"
         BRANCH_PREFIX=$(echo "$BRANCH_NAME" | cut -d'/' -f1)
@@ -83,6 +82,7 @@ jobs:
         git tag -a $NEW_TAG -m "New Experiment"
         git push origin $NEW_TAG
         echo "NEW_TAG=$NEW_TAG" >> "$GITHUB_OUTPUT"
+      shell: bash
 
     - name: Create Pull Request
       if: steps.compare_metrics.outputs.diff == 'acceptable' 

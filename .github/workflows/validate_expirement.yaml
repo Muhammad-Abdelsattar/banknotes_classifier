@@ -68,7 +68,7 @@ jobs:
         BRANCH_PREFIX=$(echo "$BRANCH_NAME" | cut -d'/' -f1)
         BRANCH_SUFFIX=$(echo "$BRANCH_NAME" | cut -d'/' -f2-)
         echo "Reached point 0"
-        LATEST_TAG=$(git tag --list | grep -E "$BRANCH_SUFFIX" | sort -V | tail -n 1)
+        LATEST_TAG=$(git tag -l "$BRANCH_SUFFIX\*" | sort -V | tail -n 1)
         echo "Reached point 1"
         if [ -n "$LATEST_TAG" ]; then
           echo "Reached point 2"

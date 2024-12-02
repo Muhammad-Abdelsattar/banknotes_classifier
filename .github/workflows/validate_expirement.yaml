@@ -62,14 +62,12 @@ jobs:
     #   shell: bash
     
     - name: register experiment
-      if: ${{ steps.compare_metrics.outputs.diff}} == 'acceptable' 
+      # if: ${{ steps.compare_metrics.outputs.diff}} == 'acceptable' 
       run: |
         BRANCH_NAME="${GITHUB_REF#refs/heads/}"
         BRANCH_PREFIX=$(echo "$BRANCH_NAME" | cut -d'/' -f1)
         BRANCH_SUFFIX=$(echo "$BRANCH_NAME" | cut -d'/' -f2-)
-
         echo "Reached point 0"
-
         LATEST_TAG=$(git tag --list | grep -E "$BRANCH_SUFFIX" | sort -V | tail -n 1)
         echo "Reached point 1"
         if [ -n "$LATEST_TAG" ]; then
@@ -90,7 +88,7 @@ jobs:
       shell: bash
 
     - name: Create Pull Request
-      if: steps.compare_metrics.outputs.diff == 'acceptable' 
+      # if: steps.compare_metrics.outputs.diff == 'acceptable' 
       uses: peter-evans/create-pull-request@v5
       with:
         commit-message: New promising experiment.

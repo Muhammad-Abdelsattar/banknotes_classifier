@@ -91,6 +91,7 @@ jobs:
       # if: steps.compare_metrics.outputs.diff == 'acceptable' 
       uses: peter-evans/create-pull-request@v5
       with:
+        token: ${{ secrets.PAT }}
         commit-message: New promising experiment.
         branch: dev
         title: ${{ steps.register_experiment.outputs.NEW_TAG }}

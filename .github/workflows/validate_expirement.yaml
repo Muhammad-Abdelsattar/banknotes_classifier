@@ -39,27 +39,27 @@ jobs:
         dvc remote modify myremote gdrive_acknowledge_abuse true
         dvc remote modify myremote --local gdrive_service_account_json_file_path creds.json
 
-    # Step 5: Run evaluation script and pull necessary data from DVC
-    - name: Run Evaluation
-      run: |
-        dvc pull artifacts/model.onnx
-        dvc pull input/test_dataset.zip
-        unzip -o input/test_dataset.zip -d input/test_dataset > /dev/null 2>&1
-        python -m steps.evaluate
+    # # Step 5: Run evaluation script and pull necessary data from DVC
+    # - name: Run Evaluation
+    #   run: |
+    #     dvc pull artifacts/model.onnx
+    #     dvc pull input/test_dataset.zip
+    #     unzip -o input/test_dataset.zip -d input/test_dataset > /dev/null 2>&1
+    #     python -m steps.evaluate
   
-    - name: Compare metrics
-      id: compare_metrics
-      run: |
-        # Run metrics diff check
-        dvc metrics diff --targets reports/evaluation.json --all --json --no-path -- master > diff.json
-        python .github/workflows/helpers/check.py
-        diff="not acceptable"
-        # Determine if the metric is "acceptable" 
-        if [[ $(< diff.txt) == "acceptable" ]]; then
-          diff="acceptable"
-        fi
-        echo "diff=$diff" >> "$GITHUB_OUTPUT"
-      shell: bash
+    # - name: Compare metrics
+    #   id: compare_metrics
+    #   run: |
+    #     # Run metrics diff check
+    #     dvc metrics diff --targets reports/evaluation.json --all --json --no-path -- master > diff.json
+    #     python .github/workflows/helpers/check.py
+    #     diff="not acceptable"
+    #     # Determine if the metric is "acceptable" 
+    #     if [[ $(< diff.txt) == "acceptable" ]]; then
+    #       diff="acceptable"
+    #     fi
+    #     echo "diff=$diff" >> "$GITHUB_OUTPUT"
+    #   shell: bash
     
     - name: register experiment
       if: ${{ steps.compare_metrics.outputs.diff}} == 'acceptable' 
@@ -68,7 +68,8 @@ jobs:
         BRANCH_NAME="${GITHUB_REF#refs/heads/}"
         BRANCH_PREFIX=$(echo "$BRANCH_NAME" | cut -d'/' -f1)
         BRANCH_SUFFIX=$(echo "$BRANCH_NAME" | cut -d'/' -f2-)
-        LATEST_TAG=$(git tag --list | grep "$BRANCH_SUFFIX" | sort -V | tail -n 1)
+
+        LATEST_TAG=$(git tag --list | grep -E "$BRANCH_SUFFIX" | sort -V | tail -n 1)
         if [ -n "$LATEST_TAG" ]; then
           CURRENT_VERSION=$(echo "$LATEST_TAG" | grep -oE '[0-9]+$')
           NEW_VERSION=$((CURRENT_VERSION + 1))

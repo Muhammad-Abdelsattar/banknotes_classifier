@@ -1,0 +1,87 @@
+on:
+  push:
+    branches:
+      - "exp/*"
+
+jobs:
+  validate_experiment:
+    runs-on: self-hosted
+    env:
+      PYTHON_VERSION: '3.10.12'
+
+    # Step 1: Checkout code with full history and tags
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        fetch-tags: true
+        token: ${{ secrets.PAT }}
+
+    # Step 2: Set up Python environment
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    # Step 3: Install dependencies
+    - name: Install Dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+
+    # Step 4: Configure DVC for Google Drive remote
+    - name: Configure DVC
+      run: |
+        echo '${{ secrets.GDRIVE_CREDENTIALS_DATA }}' > creds.json
+        dvc remote add -d -f myremote gdrive://1IdooJif1hoyvpqVNU8zjniOqhMus1Js4
+        dvc remote modify myremote gdrive_use_service_account true
+        dvc remote modify myremote gdrive_acknowledge_abuse true
+        dvc remote modify myremote --local gdrive_service_account_json_file_path creds.json
+
+    # Step 5: Run evaluation script and pull necessary data from DVC
+    - name: Run Evaluation
+      run: |
+        dvc pull artifacts/model.onnx
+        dvc pull input/test_dataset.zip
+        unzip -o input/test_dataset.zip -d input/test_dataset > /dev/null 2>&1
+        python -m steps.evaluate
+  
+    - name: Compare metrics
+      id: compare_metrics
+      run: |
+        # Run metrics diff check
+        dvc metrics diff --targets reports/evaluation.json --all --json --no-path -- master > diff.json
+        python .github/workflows/helpers/check.py
+        diff="not acceptable"
+        # Determine if the metric is "accecptable" 
+        if [[ $(< diff.txt) == "Acceptable" ]]; then
+          diff="acceptable"
+        echo "diff=$diff" >> "$GITHUB_OUTPUT"
+    
+    - name: register experiment
+      if: ${{ steps.compare_metrics.outputs.diff=="acceptable" }}
+      run: |
+        latest_tag=$(git tag --sort=-v:refname | grep ${github.refname##*/} | head -n 1)
+        if [[ -n "$latest_tag" ]]; then
+          latest_version=$(echo "$latest_tag" | grep -oE '[0-9]+$')
+        else
+          latest_version=0
+        new_version=$((latest_version + 1))
+        new_tag="${github.refname##*/}@v${new_version}"
+        git tag -a $new_tag -m "New Experiment"
+        git push origin $new_tag
+        echo "NEW_TAG=$new_tag" >> "$GITHUB_OUTPUT"
+
+    - name: Create Pull Request
+      if: ${{ steps.compare_metrics.outputs.diff=="accecptable" }}
+      uses: peter-evans/create-pull-request@v5
+      with:
+        commit-message: New promising experiment.
+        branch: dev
+        title: ${{ steps.register_experiment.outputs.NEW_TAG }}
+        body: |
+          This PR was created automatically by the GitHub Actions workflow.
+        labels: |
+          automated
+          new-exp

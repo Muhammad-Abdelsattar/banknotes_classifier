@@ -1,0 +1,76 @@
+on:
+  pull_request:
+    branches:
+      - dev
+  # workflow_dispatch:
+  #   inputs:
+  #     exp_branch:
+  #       description: 'Branch to Pull request from'
+  #       required: true
+jobs:
+  pr_to_dev:
+    runs-on: self-hosted
+    env:
+      PYTHON_VERSION: '3.10.12'
+    
+      # Step 1: Checkout code with full history and tags
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        fetch-tags: true
+        token: ${{ secrets.PAT }}
+
+    # Step 2: Set up Python environment
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    # Step 3: Install dependencies
+    - name: Install Dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Create New Hugging Face Space
+      id: create_hf_space
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        HF_USERNAME: ${{ secrets.HF_USERNAME }}
+      run: |
+        # Define the Space name based on the input provided
+        SPACE_NAME="${{ github.head_ref }}"
+        python .github/workflows/helpers/hf_spaces.py create-space \
+          --space-name $SPACE_NAME \
+          --user-name $HF_USERNAME \
+          --token $HF_TOKEN \
+          --space-sdk gradio
+        echo "SPACE_NAME=$SPACE_NAME" >> "$GITHUB_OUTPUT"
+
+    - name: configure dvc
+      run: |
+        echo -E '${{ secrets.GDRIVE_CREDENTIALS_DATA }}' > creds.json
+        cat creds.json
+        dvc remote add -d -f myremote gdrive://1IdooJif1hoyvpqVNU8zjniOqhMus1Js4
+        dvc remote modify myremote gdrive_use_service_account true
+        dvc remote modify myremote gdrive_acknowledge_abuse true 
+        dvc remote modify myremote --local gdrive_service_account_json_file_path creds.json 
+
+    - name: Download Model
+      run: |
+        dvc pull artifacts/model.onnx
+
+    - name: Upload App
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        HF_USERNAME: ${{ secrets.HF_USERNAME }}
+      run: |
+        cp -r artifacts/ demo_app/
+        python .github/workflows/helpers/hf_spaces.py upload-folder \
+          --space-name ${{ steps.create_hf_space.outputs.SPACE_NAME }} \
+          --folder-path demo_app/ \
+          --path-in-repo . \
+          --user-name $HF_USERNAME \
+          --token $HF_TOKEN \

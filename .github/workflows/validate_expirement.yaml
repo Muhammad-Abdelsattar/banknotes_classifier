@@ -54,27 +54,37 @@ jobs:
         dvc metrics diff --targets reports/evaluation.json --all --json --no-path -- master > diff.json
         python .github/workflows/helpers/check.py
         diff="not acceptable"
-        # Determine if the metric is "accecptable" 
-        if [[ $(< diff.txt) == "Acceptable" ]]; then
+        # Determine if the metric is "acceptable" 
+        if [[ $(< diff.txt) == "acceptable" ]]; then
           diff="acceptable"
+        fi
         echo "diff=$diff" >> "$GITHUB_OUTPUT"
+      shell: bash
     
     - name: register experiment
-      if: ${{ steps.compare_metrics.outputs.diff=="acceptable" }}
+      if: ${{ steps.compare_metrics.outputs.diff}} == 'acceptable' 
+      shell: bash
       run: |
-        latest_tag=$(git tag --sort=-v:refname | grep ${github.refname##*/} | head -n 1)
-        if [[ -n "$latest_tag" ]]; then
-          latest_version=$(echo "$latest_tag" | grep -oE '[0-9]+$')
+        BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+        BRANCH_PREFIX=$(echo "$BRANCH_NAME" | cut -d'/' -f1)
+        BRANCH_SUFFIX=$(echo "$BRANCH_NAME" | cut -d'/' -f2-)
+        LATEST_TAG=$(git tag --list | grep "$BRANCH_SUFFIX" | sort -V | tail -n 1)
+        if [ -n "$LATEST_TAG" ]; then
+          CURRENT_VERSION=$(echo "$LATEST_TAG" | grep -oE '[0-9]+$')
+          NEW_VERSION=$((CURRENT_VERSION + 1))
+          echo "$NEW_VERSION"
+          NEW_TAG="$BRANCH_SUFFIX-v$NEW_VERSION"
         else
-          latest_version=0
-        new_version=$((latest_version + 1))
-        new_tag="${github.refname##*/}@v${new_version}"
-        git tag -a $new_tag -m "New Experiment"
-        git push origin $new_tag
-        echo "NEW_TAG=$new_tag" >> "$GITHUB_OUTPUT"
+          echo "No existing tag found. Starting with 0."
+          # If no existing tag, start with 0
+          NEW_TAG="$BRANCH_SUFFIX-v0"
+        fi
+        git tag -a $NEW_TAG -m "New Experiment"
+        git push origin $NEW_TAG
+        echo "NEW_TAG=$NEW_TAG" >> "$GITHUB_OUTPUT"
 
     - name: Create Pull Request
-      if: ${{ steps.compare_metrics.outputs.diff=="acceptable" }}
+      if: steps.compare_metrics.outputs.diff == 'acceptable' 
       uses: peter-evans/create-pull-request@v5
       with:
         commit-message: New promising experiment.

@@ -94,7 +94,13 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.PAT }}
       run: |
-        gh pr create --base dev --head "${GITHUB_REF#refs/heads/}" \
-        --title "A promising experiment." \
-        --body "This PR was created automatically by the GitHub Actions workflow." 
+        head_ref="${GITHUB_REF#refs/heads/}"
+        latest_pr_num=$(gh pr list --head $head_ref --base dev --state open --json number -q '.[0].number')
+        if [[ -z $latest_pr_num ]]; then
+          gh pr create --base dev --head "${GITHUB_REF#refs/heads/}" \
+          --title "A promising experiment." \
+          --body "This PR was created automatically by the GitHub Actions workflow." 
+        else
+          gh pr comment $latest_pr_num --body "This PR has been updated with the latest changes."
+        fi
         

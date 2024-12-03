@@ -89,11 +89,12 @@ jobs:
 
     - name: Create Pull Request
       # if: steps.compare_metrics.outputs.diff == 'acceptable' 
-      uses: peter-evans/create-pull-request@v5
+      uses: peter-evans/create-pull-request@v7
       with:
         token: ${{ secrets.PAT }}
         commit-message: New promising experiment.
         base: dev
+        head: ${{ github.ref }}
         title: ${{ steps.register_experiment.outputs.NEW_TAG }}
         body: |
           This PR was created automatically by the GitHub Actions workflow.

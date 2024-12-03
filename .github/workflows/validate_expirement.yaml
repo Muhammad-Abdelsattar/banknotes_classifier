@@ -94,7 +94,6 @@ jobs:
         token: ${{ secrets.PAT }}
         commit-message: New promising experiment.
         base: dev
-        branch: pr_branch
         title: ${{ steps.register_experiment.outputs.NEW_TAG }}
         body: |
           This PR was created automatically by the GitHub Actions workflow.

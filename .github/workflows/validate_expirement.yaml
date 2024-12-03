@@ -93,7 +93,7 @@ jobs:
       with:
         token: ${{ secrets.PAT }}
         commit-message: New promising experiment.
-        base: dev
+        base: master
         branch: promote-to-staging
         delete-branch: false
         title: ${{ steps.register_experiment.outputs.NEW_TAG }}

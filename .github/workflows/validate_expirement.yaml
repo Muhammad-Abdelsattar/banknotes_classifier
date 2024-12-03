@@ -54,12 +54,13 @@ jobs:
       run: |
         # Run metrics diff check
         dvc metrics diff --targets reports/evaluation.json --all --json --no-path -- master > diff.json
-        python .github/workflows/helpers/check.py
+        # python .github/workflows/helpers/check.py
         diff="not acceptable"
         # Determine if the metric is "acceptable" 
         if [[ $(< diff.txt) == "acceptable" ]]; then
           diff="acceptable"
         fi
+        echo $diff
         echo "diff=$diff" >> "$GITHUB_OUTPUT"
       shell: bash
     

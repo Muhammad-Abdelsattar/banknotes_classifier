@@ -23,6 +23,8 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PYTHON_VERSION }}
+    - name: Install GH CLI
+      uses: dev-hanz-ops/install-gh-cli-action@v0.2.0
 
     # Step 3: Install dependencies
     - name: Install Dependencies
@@ -87,18 +89,27 @@ jobs:
         echo "NEW_TAG=$NEW_TAG" >> "$GITHUB_OUTPUT"
       shell: bash
 
-    - name: Create Pull Request
-      # if: steps.compare_metrics.outputs.diff == 'acceptable' 
-      uses: peter-evans/create-pull-request@v7
-      with:
-        token: ${{ secrets.PAT }}
-        commit-message: New promising experiment.
-        base: master
-        branch: promote-to-staging
-        delete-branch: false
-        title: ${{ steps.register_experiment.outputs.NEW_TAG }}
-        body: |
-          This PR was created automatically by the GitHub Actions workflow.
-        labels: |
-          automated
-          new-exp
+    # - name: Create Pull Request
+    #   # if: steps.compare_metrics.outputs.diff == 'acceptable' 
+    #   uses: peter-evans/create-pull-request@v7
+    #   with:
+    #     token: ${{ secrets.PAT }}
+    #     commit-message: New promising experiment.
+    #     base: master
+    #     branch: promote-to-staging
+    #     delete-branch: false
+    #     title: ${{ steps.register_experiment.outputs.NEW_TAG }}
+    #     body: |
+    #       This PR was created automatically by the GitHub Actions workflow.
+    #     labels: |
+    #       automated
+    #       new-exp
+
+    - name: Create Pull Request to dev
+      env:
+        GH_TOKEN: ${{ secrets.PAT }}
+      run: |
+        gh pr create --base dev --head "${GITHUB_REF#refs/heads/}" \
+        --title "A promising experiment." \
+        --body "This PR was created automatically by the GitHub Actions workflow." 
+        

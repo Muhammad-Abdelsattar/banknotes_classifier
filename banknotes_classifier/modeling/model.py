@@ -55,3 +55,8 @@ class ExportReadyModel(nn.Module):
     def forward(self,x):
         x = self.normalize_image(x)
         return self.softmax(self.model(x))
+
+
+def get_model_for_training():
+    model = EfficientNetClassifier(14,True)
+    return model

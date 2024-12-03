@@ -41,30 +41,30 @@ jobs:
         dvc remote modify myremote gdrive_acknowledge_abuse true
         dvc remote modify myremote --local gdrive_service_account_json_file_path creds.json
 
-    # # Step 5: Run evaluation script and pull necessary data from DVC
-    # - name: Run Evaluation
-    #   run: |
-    #     dvc pull artifacts/model.onnx
-    #     dvc pull input/test_dataset.zip
-    #     unzip -o input/test_dataset.zip -d input/test_dataset > /dev/null 2>&1
-    #     python -m steps.evaluate
+    # Step 5: Run evaluation script and pull necessary data from DVC
+    - name: Run Evaluation
+      run: |
+        dvc pull artifacts/model.onnx
+        dvc pull input/test_dataset.zip
+        unzip -o input/test_dataset.zip -d input/test_dataset > /dev/null 2>&1
+        python -m steps.evaluate
   
-    # - name: Compare metrics
-    #   id: compare_metrics
-    #   run: |
-    #     # Run metrics diff check
-    #     dvc metrics diff --targets reports/evaluation.json --all --json --no-path -- master > diff.json
-    #     python .github/workflows/helpers/check.py
-    #     diff="not acceptable"
-    #     # Determine if the metric is "acceptable" 
-    #     if [[ $(< diff.txt) == "acceptable" ]]; then
-    #       diff="acceptable"
-    #     fi
-    #     echo "diff=$diff" >> "$GITHUB_OUTPUT"
-    #   shell: bash
+    - name: Compare metrics
+      id: compare_metrics
+      run: |
+        # Run metrics diff check
+        dvc metrics diff --targets reports/evaluation.json --all --json --no-path -- master > diff.json
+        python .github/workflows/helpers/check.py
+        diff="not acceptable"
+        # Determine if the metric is "acceptable" 
+        if [[ $(< diff.txt) == "acceptable" ]]; then
+          diff="acceptable"
+        fi
+        echo "diff=$diff" >> "$GITHUB_OUTPUT"
+      shell: bash
     
     - name: register experiment
-      # if: ${{ steps.compare_metrics.outputs.diff}} == 'acceptable' 
+      if: steps.compare_metrics.outputs.diff == 'acceptable' 
       run: |
         BRANCH_NAME="${GITHUB_REF#refs/heads/}"
         BRANCH_PREFIX=$(echo "$BRANCH_NAME" | cut -d'/' -f1)
@@ -89,23 +89,8 @@ jobs:
         echo "NEW_TAG=$NEW_TAG" >> "$GITHUB_OUTPUT"
       shell: bash
 
-    # - name: Create Pull Request
-    #   # if: steps.compare_metrics.outputs.diff == 'acceptable' 
-    #   uses: peter-evans/create-pull-request@v7
-    #   with:
-    #     token: ${{ secrets.PAT }}
-    #     commit-message: New promising experiment.
-    #     base: master
-    #     branch: promote-to-staging
-    #     delete-branch: false
-    #     title: ${{ steps.register_experiment.outputs.NEW_TAG }}
-    #     body: |
-    #       This PR was created automatically by the GitHub Actions workflow.
-    #     labels: |
-    #       automated
-    #       new-exp
-
     - name: Create Pull Request to dev
+      if: steps.compare_metrics.outputs.diff == 'acceptable'
       env:
         GH_TOKEN: ${{ secrets.PAT }}
       run: |

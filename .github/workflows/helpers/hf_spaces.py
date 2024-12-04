@@ -20,8 +20,8 @@ def create_space(space_name: Annotated[str,Option()],
                             token=token)
         print(f"Space {space_name} created")
     except:
-        print(f"Space {space_name} already exists")
-        raise Exception("Space already exists")
+        print(f"An Error occured.")
+        raise Exception("Error.")
 
 
 @cli.command()

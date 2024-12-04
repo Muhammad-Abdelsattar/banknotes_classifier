@@ -1,11 +1,11 @@
-on:
+n:
   push:
     branches:
       - "exp/*"
 
 jobs:
   validate_experiment:
-    runs-on: self-hosted
+    runs-on: self-hosted fs
     env:
       PYTHON_VERSION: '3.10.12'
 
@@ -23,6 +23,8 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PYTHON_VERSION }}
+    - name: Install GH CLI
+      uses: dev-hanz-ops/install-gh-cli-action@v0.2.0
 
     # Step 3: Install dependencies
     - name: Install Dependencies
@@ -62,13 +64,12 @@ jobs:
       shell: bash
     
     - name: register experiment
-      if: ${{ steps.compare_metrics.outputs.diff}} == 'acceptable' 
-      shell: bash
+      if: steps.compare_metrics.outputs.diff == 'acceptable' 
       run: |
         BRANCH_NAME="${GITHUB_REF#refs/heads/}"
         BRANCH_PREFIX=$(echo "$BRANCH_NAME" | cut -d'/' -f1)
         BRANCH_SUFFIX=$(echo "$BRANCH_NAME" | cut -d'/' -f2-)
-        LATEST_TAG=$(git tag --list | grep "$BRANCH_SUFFIX" | sort -V | tail -n 1)
+        LATEST_TAG=$(git tag -l "$BRANCH_SUFFIX"\* | sort -V | tail -n 1)
         if [ -n "$LATEST_TAG" ]; then
           CURRENT_VERSION=$(echo "$LATEST_TAG" | grep -oE '[0-9]+$')
           NEW_VERSION=$((CURRENT_VERSION + 1))
@@ -82,16 +83,20 @@ jobs:
         git tag -a $NEW_TAG -m "New Experiment"
         git push origin $NEW_TAG
         echo "NEW_TAG=$NEW_TAG" >> "$GITHUB_OUTPUT"
+      shell: bash
 
-    - name: Create Pull Request
-      if: steps.compare_metrics.outputs.diff == 'acceptable' 
-      uses: peter-evans/create-pull-request@v5
-      with:
-        commit-message: New promising experiment.
-        branch: dev
-        title: ${{ steps.register_experiment.outputs.NEW_TAG }}
-        body: |
-          This PR was created automatically by the GitHub Actions workflow.
-        labels: |
-          automated
-          new-exp
+    - name: Create Pull Request to dev
+      if: steps.compare_metrics.outputs.diff == 'acceptable'
+      env:
+        GH_TOKEN: ${{ secrets.PAT }}
+      run: |
+        head_ref="${GITHUB_REF#refs/heads/}"
+        latest_pr_num=$(gh pr list --head $head_ref --base dev --state open --json number -q '.[0].number')
+        if [[ -z $latest_pr_num ]]; then
+          gh pr create --base dev --head "${GITHUB_REF#refs/heads/}" \
+          --title "A promising experiment." \
+          --body "This PR was created automatically by the GitHub Actions workflow." 
+        else
+          gh pr comment $latest_pr_num --body "This PR has been updated with the latest changes."
+        fi
+        

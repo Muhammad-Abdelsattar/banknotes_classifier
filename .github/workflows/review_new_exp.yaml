@@ -1,12 +1,8 @@
 on:
   pull_request:
+    types: [opened, reopened]
     branches:
       - dev
-  # workflow_dispatch:
-  #   inputs:
-  #     exp_branch:
-  #       description: 'Branch to Pull request from'
-  #       required: true
 jobs:
   pr_to_dev:
     runs-on: self-hosted
@@ -41,7 +37,20 @@ jobs:
         HF_USERNAME: ${{ secrets.HF_USERNAME }}
       run: |
         # Define the Space name based on the input provided
-        SPACE_NAME="${{ github.head_ref }}"
+        BRANCH_NAME="${{ github.head_ref }}"
+        BRANCH_PREFIX=$(echo "$BRANCH_NAME" | cut -d'/' -f1)
+        BRANCH_SUFFIX=$(echo "$BRANCH_NAME" | cut -d'/' -f2-)
+        echo "Reached point 0"
+        LATEST_TAG=$(git tag -l "$BRANCH_SUFFIX"\* | sort -V | tail -n 1)
+        echo "Reached point 1"
+        if [ -n "$LATEST_TAG" ]; then
+          echo "Reached point 2"
+          CURRENT_VERSION=$(echo "$LATEST_TAG" | grep -oE '[0-9]+$')
+          SPACE_NAME="$BRANCH_SUFFIX-v$CURRENT_VERSION"
+        else
+          echo "No existing tag found."
+          exit 1
+        fi
         python .github/workflows/helpers/hf_spaces.py create-space \
           --space-name $SPACE_NAME \
           --user-name $HF_USERNAME \

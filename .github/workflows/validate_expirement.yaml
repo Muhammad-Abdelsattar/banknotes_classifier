@@ -5,7 +5,7 @@ on:
 
 jobs:
   validate_experiment:
-    runs-on: self-hosted fs
+    runs-on: self-hosted
     env:
       PYTHON_VERSION: '3.10.12'
 
@@ -99,4 +99,3 @@ jobs:
         else
           gh pr comment $latest_pr_num --body "This PR has been updated with the latest changes."
         fi
-        

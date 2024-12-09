@@ -12,7 +12,9 @@ class InferencePipeline:
     def __call__(self, image):
         image = self._prepare_input(image)
         output = self.predict(image)
-        return output.max().item(), output.argmax().item()
+        pred = output.argmax().item()
+        score = output[pred].item()
+        return pred, score
 
     def _prepare_input(self, image):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -22,5 +24,5 @@ class InferencePipeline:
         return image
 
     def predict(self, image):
-        output = self.model.run([self.output_name], {self.input_name: image})[0]
+        output = self.model.run([self.output_name], {self.input_name: image})[0][0]
         return output

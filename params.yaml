@@ -22,7 +22,7 @@ training:
       refresh_rate: 1
 
   logger:
-    dir: reports
+    dir: reports/training
 
 export:
   model_path: artifacts/model.onnx

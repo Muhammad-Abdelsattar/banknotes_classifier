@@ -2,9 +2,9 @@ import os
 import glob
 import torch
 from torch.utils.data import DataLoader
-from banknotes_classifier.evaluation.evaluation import compute_accuracy, compute_avg_score
+from banknotes_classifier.evaluation.evaluation import compute_accuracy, compute_avg_confidence_score, get_confusion_matrix
 from banknotes_classifier.evaluation.inference_pipeline import InferencePipeline
-from banknotes_classifier.evaluation.utils import write_metric
+from banknotes_classifier.evaluation.utils import write_metrics, write_confusion_matrix_plot
 from banknotes_classifier.data.dataset import TestBanknotesDataset
 
 def evaluate(config: dict):
@@ -18,7 +18,14 @@ def evaluate(config: dict):
         model_outs.append(pipeline(image))
         labels.append(label)
     accuracy = compute_accuracy(model_outs, labels)
-    write_metric("accuracy", accuracy,"reports/evaluation.json")
+    avg_confidence = compute_avg_confidence_score(model_outs)
+    confusion_matrix = get_confusion_matrix(model_outs, labels)
+    metrics_dict = {
+        "accuracy": accuracy,
+        "avg_confidence": avg_confidence,
+    }
+    write_metrics(metrics_dict,"reports/evaluation/metrics.json")
+    write_confusion_matrix_plot(confusion_matrix,"reports/evaluation/plots/confusion_matrix.png")
     
 
 if __name__ == "__main__":

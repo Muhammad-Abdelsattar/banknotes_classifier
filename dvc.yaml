@@ -1,46 +1,49 @@
 params:
-- params.yaml
-- reports/params.yaml
+  - params.yaml
+  - reports/params.yaml
 stages:
   prepare:
     cmd:
-    - unzip -o input/dataset.zip -d input/dataset > /dev/null 2>&1
-    - unzip -o input/test_dataset.zip -d input/test_dataset > /dev/null 2>&1
+      - unzip -o input/dataset.zip -d input/dataset > /dev/null 2>&1
+      - unzip -o input/test_dataset.zip -d input/test_dataset > /dev/null 2>&1
     deps:
-    - input/dataset.zip
+      - input/dataset.zip
     outs:
-    - input/dataset
+      - input/dataset
   train:
     cmd: python -m steps.train
     deps:
-    - steps/train.py
-    - banknotes_classifier/modeling
-    - banknotes_classifier/training
-    - banknotes_classifier/data
-    - input/dataset
+      - steps/train.py
+      - banknotes_classifier/modeling
+      - banknotes_classifier/training
+      - banknotes_classifier/data
+      - input/dataset
     outs:
-    - artifacts/checkpoints/best-checkpoint.ckpt
-    - reports/metrics.json:
-        cache: false
+      - artifacts/checkpoints/best-checkpoint.ckpt
+      - reports/training/metrics.json:
+          cache: false
   export:
     cmd: python -m steps.export
     deps:
-    - steps/export.py
-    - artifacts/checkpoints/best-checkpoint.ckpt
+      - steps/export.py
+      - artifacts/checkpoints/best-checkpoint.ckpt
     outs:
-    - artifacts/model.onnx
+      - artifacts/model.onnx
 
   evaluate:
     cmd: python -m steps.evaluate
     deps:
-    - steps/evaluate.py
-    - artifacts/model.onnx
-    - input/test_dataset
+      - steps/evaluate.py
+      - artifacts/model.onnx
+      - input/test_dataset
     outs:
-    - reports/evaluation.json:
-        cache: false
+      - reports/evaluaton/metrics.json:
+          cache: false
+      - reports/evaluation/plots/confusion_matrix.png:
+          cache: false
 metrics:
-- reports/metrics.json
+  - reports/evaluation
+  - reports/training
 plots:
-- reports/plots/metrics:
-    x: step
+  - reports/plots/metrics:
+      x: step

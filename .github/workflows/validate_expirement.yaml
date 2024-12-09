@@ -53,7 +53,7 @@ jobs:
       id: compare_metrics
       run: |
         # Run metrics diff check
-        dvc metrics diff --targets reports/evaluation.json --all --json --no-path -- master > diff.json
+        dvc metrics diff --targets reports/evaluation/metrics.json --all --json --no-path -- master > diff.json
         python .github/workflows/helpers/check.py
         diff="not acceptable"
         # Determine if the metric is "acceptable" 
@@ -99,3 +99,13 @@ jobs:
         else
           gh pr comment $latest_pr_num --body "This PR has been updated with the latest changes."
         fi
+        echo "PR_NUM=$latest_pr_num" >> "$GITHUB_OUTPUT"
+
+    - name: Create PR Report
+      run: |
+        echo "# Experiment Report" >> report.md
+        echo "## Metrics: Experiment vs. Production" >> report.md
+        dvc metrics diff --no-path --precision 4 --targets reports/evaluation/metrics.json --md --all -- master >> report.md
+        echo "## Confusion Matrix of the experiment" >> report.md
+        echo '![](reports/evaluation/plots/confusion_matrix.png "Confusion Matrix")' >> report.md
+        gh pr comment ${{ steps.create_pr_to_dev.outputs.PR_NUM }} --body "$(cat report.md)"

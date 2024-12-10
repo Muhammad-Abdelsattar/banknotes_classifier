@@ -58,6 +58,7 @@ jobs:
           --space-sdk gradio
         echo "SPACE_NAME=$SPACE_NAME" >> "$GITHUB_OUTPUT"
 
+
     - name: configure dvc
       run: |
         echo -E '${{ secrets.GDRIVE_CREDENTIALS_DATA }}' > creds.json
@@ -83,6 +84,12 @@ jobs:
           --path-in-repo . \
           --user-name $HF_USERNAME \
           --token $HF_TOKEN \
-
-        
-        
+          
+          # Add a comment to the PR to signal that a space was created.
+          latest_pr_num=$(gh pr list --head "${{ github.head_ref }}" --base dev --state open --json number -q '.[0].number')
+          echo "## Demo APP" >> demo_app.md
+          echo "**A Demo App on HuggingFace Spaces was automatically created.**">> demo_app.md
+          echo " You can Try the app using the link below. " >> demo_app.md
+          echo "![**Demo App**](https://huggingface.co/spaces/$HF_USERNAME/"${{ steps.create_hf_space.outputs.SPACE_NAME }}")" >> demo_app.md
+          gh pr comment $latest_pr_num\ 
+          --body "$(cat demo_app.md)"

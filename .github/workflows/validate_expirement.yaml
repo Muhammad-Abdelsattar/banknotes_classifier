@@ -48,6 +48,18 @@ jobs:
         # dvc pull input/test_dataset.zip
         # unzip -o input/test_dataset.zip -d input/test_dataset > /dev/null 2>&1
         # python -m steps.evaluate
+        echo "Eval results">results.txt
+        
+    - name: Commit and Push Metrics and plots
+      ENV:
+        GITHUB_TOKEN: ${{ secrets.PAT }}
+      run: |
+        BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add .
+        git commit -m "Added/Updated metrics and plots files from GitHub Actions [skip ci]" || echo "No changes to commit"
+        git push origin $BRANCH_NAME
   
     - name: Compare metrics
       id: compare_metrics
@@ -111,7 +123,5 @@ jobs:
         dvc metrics diff --no-path --precision 4 --targets reports/evaluation/metrics.json --md --all -- master >> report.md
         echo "## Confusion Matrix of the experiment" >> report.md
         image_url="https://github.com/${{github.repository}}/blob/$head_ref/reports/evaluation/plots/confusion_matrix.png?raw=true"
-        echo "$image_url"
-        # echo '![]($image_url)' >> report.md
         echo "![]($image_url)" >> report.md
         gh pr comment ${{ steps.create_pr_to_dev.outputs.PR_NUM }} --body "$(cat report.md)"

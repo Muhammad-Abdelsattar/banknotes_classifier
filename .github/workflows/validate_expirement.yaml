@@ -44,11 +44,10 @@ jobs:
     # Step 5: Run evaluation script and pull necessary data from DVC
     - name: Run Evaluation
       run: |
-        # dvc pull artifacts/model.onnx
-        # dvc pull input/test_dataset.zip
-        # unzip -o input/test_dataset.zip -d input/test_dataset > /dev/null 2>&1
-        # python -m steps.evaluate
-        echo "Eval results">results.txt
+        dvc pull artifacts/model.onnx
+        dvc pull input/test_dataset.zip
+        unzip -o input/test_dataset.zip -d input/test_dataset > /dev/null 2>&1
+        python -m steps.evaluate
         
     - name: Commit and Push Metrics and plots
       env:

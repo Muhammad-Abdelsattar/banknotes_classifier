@@ -110,7 +110,7 @@ jobs:
         echo "## Metrics: Experiment vs. Production" >> report.md
         dvc metrics diff --no-path --precision 4 --targets reports/evaluation/metrics.json --md --all -- master >> report.md
         echo "## Confusion Matrix of the experiment" >> report.md
-        image_url="https://github.com/'${{github.repository}}'/blob/$head_ref/reports/evaluation/plots/confusion_matrix.png?raw=true"
+        image_url="https://github.com/${{github.repository}}/blob/$head_ref/reports/evaluation/plots/confusion_matrix.png?raw=true"
         echo "$image_url"
         # echo '![]($image_url)' >> report.md
         echo "![]($image_url)" >> report.md

@@ -51,7 +51,7 @@ jobs:
         echo "Eval results">results.txt
         
     - name: Commit and Push Metrics and plots
-      ENV:
+      env:
         GITHUB_TOKEN: ${{ secrets.PAT }}
       run: |
         BRANCH_NAME="${GITHUB_REF#refs/heads/}"

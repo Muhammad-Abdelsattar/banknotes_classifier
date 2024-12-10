@@ -103,9 +103,10 @@ jobs:
 
     - name: Create PR Report
       run: |
+        head_ref="${GITHUB_REF#refs/heads/}"
         echo "# Experiment Report" >> report.md
         echo "## Metrics: Experiment vs. Production" >> report.md
         dvc metrics diff --no-path --precision 4 --targets reports/evaluation/metrics.json --md --all -- master >> report.md
         echo "## Confusion Matrix of the experiment" >> report.md
-        echo '![](./reports/evaluation/plots/confusion_matrix.png)' >> report.md
+        echo '![]($head_ref/reports/evaluation/plots/confusion_matrix.png?raw=true)' >> report.md
         gh pr comment ${{ steps.create_pr_to_dev.outputs.PR_NUM }} --body "$(cat report.md)"

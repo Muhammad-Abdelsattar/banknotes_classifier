@@ -108,7 +108,7 @@ jobs:
           --title "A promising experiment." \
           --body "This PR was created automatically by the GitHub Actions workflow." 
         else
-          gh pr comment $latest_pr_num --body "This PR has been updated with the latest changes."
+          gh pr comment $latest_pr_num --body "This PR has been updated with the latest changes ."
         fi
         echo "PR_NUM=$latest_pr_num" >> "$GITHUB_OUTPUT"
 

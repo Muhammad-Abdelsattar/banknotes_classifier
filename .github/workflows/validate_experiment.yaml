@@ -26,6 +26,15 @@ jobs:
     - name: Install GH CLI
       uses: dev-hanz-ops/install-gh-cli-action@v0.2.0
 
+    # Cache pip dependencies
+    - name: Cache pip dependencies
+      uses: actions/cache@v3 # Using v3, check for latest if possible
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
     # Step 3: Install dependencies
     - name: Install Dependencies
       run: |
@@ -56,7 +65,10 @@ jobs:
         BRANCH_NAME="${GITHUB_REF#refs/heads/}"
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        git add .
+        # Changed from git add . to be more specific
+        git add reports/ 
+        # Consider if params.yaml or dvc.lock should be added if they are modified by the pipeline
+        # git add reports/ params.yaml dvc.lock 
         git commit -m "Added/Updated metrics and plots files from GitHub Actions [skip ci]" || echo "No changes to commit"
         git push origin $BRANCH_NAME
   

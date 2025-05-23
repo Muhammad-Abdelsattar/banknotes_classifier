@@ -28,8 +28,10 @@ The project is organized as follows:
     -   `modeling/`: Defines the model architecture and PyTorch Lightning module.
     -   `training/`: Scripts and utilities for model training.
     -   `evaluation/`: Scripts for model evaluation and inference pipelines.
--   `app/`: Contains the code for the production inference application, which uses FastAPI to serve the model. This application is intended to be packaged as a Docker image for deployment.
--   `demo_app/`: Contains the code for a Gradio-based demo application designed for Hugging Face Spaces.
+-   `deployment/`: Contains application code, demo code, and Docker configuration.
+    -   `app/`: Contains the code for the production inference application (FastAPI).
+    -   `demo_app/`: Contains the code for the Gradio demo application.
+    -   `Dockerfile`: Dockerfile for building the production application image.
 -   `input/`: Stores raw datasets and DVC metadata files for versioning large data files.
     -   `dataset.zip.dvc`: DVC file for the training dataset.
     -   `test_dataset.zip.dvc`: DVC file for the test dataset.
@@ -108,7 +110,10 @@ dvc pull
 # The prepare stage (dvc repro prepare) will then unzip them.
 ```
 
-The script `scripts/dataset_generation.py` is crucial as it provides the functionality to create the synthetic training dataset. It takes a smaller set of original banknote images, creates numerous variations (rotations, halves), applies a series of augmentations (e.g., brightness, contrast, perspective changes), and overlays them onto various background images. This process significantly expands the dataset volume and diversity, which is essential for training a robust model.
+The script `scripts/dataset_generation.py` is crucial as it provides the functionality to create the synthetic training dataset. To use it, you need to provide paths to two main input directories:
+-   One directory containing the original banknote images, typically organized into subdirectories by class (e.g., `banknotes/`, passed to the `banknotes_path` parameter).
+-   Another directory containing various background images (e.g., `backgrounds/`, passed to the `backgrounds_path` parameter).
+The script then takes these original banknotes, creates numerous variations (rotations, halves using its `make_variations` function into an intermediate `banknotes_vars_path`), applies a series of augmentations (e.g., brightness, contrast, perspective changes), and overlays them onto the background images. This process significantly expands the dataset volume and diversity, which is essential for training a robust model. The output is saved to a specified `dataset_path`.
 
 ## Modeling
 
@@ -287,9 +292,9 @@ The project incorporates CI/CD and MLOps practices using GitHub Actions to autom
         5.  Pushes the new incremented production tag (e.g., `production-v2`) to the current commit on `master`.
         6.  Sets up Docker Buildx and logs into Docker Hub.
         7.  Extracts Docker metadata: the image is tagged with the new `production-vN` tag and `latest`.
-        8.  Builds and pushes the Docker image from `app/` to Docker Hub.
+        8.  Builds and pushes the Docker image from `deployment/app/` (using `deployment/Dockerfile`) to Docker Hub.
 
-4.  **Demo Application Deployment (`.github/workflows/deploy_demo_app.yaml`)**
+4.  **Demo Application Deployment (`.github/workflows/deploy_huggingface_demo.yaml`)**
     *   **Trigger**: When a Pull Request is opened or reopened targeting the `dev` branch.
     *   **Purpose**: To automatically deploy a demo version of the application to Hugging Face Spaces, allowing for easy testing and showcasing of the changes.
     *   **Process**:
@@ -297,7 +302,7 @@ The project incorporates CI/CD and MLOps practices using GitHub Actions to autom
         2.  Installs dependencies.
         3.  **Hugging Face Space Creation**: Creates a new (or uses an existing) Hugging Face Space. The Space name is dynamically generated based on the branch name and the latest version tag associated with it.
         4.  Configures DVC and pulls the required `model.onnx` artifact.
-        5.  **Application Upload**: Copies the `artifacts/` (containing the model) into the `demo_app/` directory and then uploads the entire `demo_app/` contents to the designated Hugging Face Space.
+        5.  **Application Upload**: Copies `artifacts/model.onnx` into `deployment/demo_app/artifacts/` and then uploads the entire `deployment/demo_app/` contents to the designated Hugging Face Space.
         6.  **PR Comment**: Posts a comment on the Pull Request with a direct link to the deployed Hugging Face Space, allowing reviewers and stakeholders to interact with the demo.
 
 ### MLOps Practices Implemented:
@@ -317,26 +322,26 @@ The project incorporates CI/CD and MLOps practices using GitHub Actions to autom
 This project provides multiple ways to interact with and deploy the banknote classifier:
 
 1.  **Hugging Face Spaces Demo (Gradio)**
-    *   **Location**: `demo_app/`
-    *   **Description**: A web-based interactive demo built with Gradio (`demo_app/app.py`) for quick testing and visualization by uploading banknote images.
+    *   **Location**: `deployment/demo_app/`
+    *   **Description**: A web-based interactive demo built with Gradio (`deployment/demo_app/app.py`) for quick testing and visualization by uploading banknote images.
     *   **Deployment**: Automatically deployed to Hugging Face Spaces when a Pull Request is opened/reopened to the `dev` branch (see [CI/CD and MLOps](#cicd-and-mlops)).
 
 2.  **Local API Application / Production Docker Image**
-    *   **Location**: `app/`
-    *   **Description**: This directory contains the core application (`app/main.py`, `app/inference.py`) that serves the classification model via a FastAPI-based API. This is the application packaged into a Docker image for production deployments.
+    *   **Location**: `deployment/app/`
+    *   **Description**: This directory contains the core application (`deployment/app/main.py`, `deployment/app/inference.py`) that serves the classification model via a FastAPI-based API. This is the application packaged into a Docker image for production deployments.
     *   **Local Setup & Running**:
-        *   Install dependencies: `pip install -r app/requirements.txt`
+        *   Install dependencies: `pip install -r deployment/app/requirements.txt`
         *   Run (example for FastAPI with uvicorn):
             ```bash
-            cd app
+            cd deployment/app
             uvicorn main:app --reload
             ```
-    *   **Dockerization**: A `Dockerfile` is present in the root directory, which is used to build the production image from the `app/` directory.
+    *   **Dockerization**: The `Dockerfile` is located in the `deployment/` directory, which is used to build the production image from the `deployment/app/` directory.
 
 3.  **Docker Hub Deployment**
     *   **Status**: Implemented
     *   **Workflow**: `.github/workflows/publish_production_release.yaml`
-    *   **Goal**: The Docker image from `app/` is automatically built and pushed to Docker Hub.
+    *   **Goal**: The Docker image from `deployment/app/` is automatically built and pushed to Docker Hub.
     *   **Trigger**: Pushes to the `master` branch.
     *   **Image Versioning**: Images are tagged with an auto-incremented version like `production-vN` (e.g., `production-v1`, `production-v2`) and `latest`. The image name on Docker Hub is `${{ secrets.DOCKERHUB_USERNAME }}/banknote_classifier`.
 
@@ -349,7 +354,7 @@ Contributions are welcome! If you'd like to contribute to this project, please f
     *   For experimental features, consider using a naming convention like `exp/your-feature-name` to leverage the automated experiment tracking workflow.
     *   For other contributions, a descriptive branch name like `feature/new-optimizer` or `fix/readme-typo` is good.
 3.  **Make your changes.** Ensure you add or update tests as appropriate.
-4.  **Test your changes thoroughly.** If your changes affect model performance, the automated experiment tracking workflow (`test_exp_pr_dev.yaml`) will help evaluate them if you push to an `exp/*` branch.
+    *   **Test your changes thoroughly.** If your changes affect model performance, the automated experiment tracking workflow (`.github/workflows/validate_experiment.yaml`) will help evaluate them if you push to an `exp/*` branch.
 5.  **Ensure your code adheres to any existing coding standards.** (Linters or formatters might be used in the project - check for configuration files).
 6.  **Commit your changes** with clear and descriptive commit messages.
 7.  **Push your branch** to your forked repository.

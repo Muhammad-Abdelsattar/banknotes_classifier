@@ -24,11 +24,26 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
+    # Cache pip dependencies
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt', '**/deployment/demo_app/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
     # Step 3: Install dependencies
     - name: Install Dependencies
       run: |
         pip install --upgrade pip
         pip install -r requirements.txt
+        # Install demo_app specific requirements if the file exists
+        if [ -f deployment/demo_app/requirements.txt ]; then
+          pip install -r deployment/demo_app/requirements.txt
+        else
+          echo "deployment/demo_app/requirements.txt not found, skipping."
+        fi
 
     - name: Create New Hugging Face Space
       id: create_hf_space

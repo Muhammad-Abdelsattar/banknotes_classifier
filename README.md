@@ -364,4 +364,6 @@ If you are planning a major change, please open an issue first to discuss it wit
 
 ## License
 
-Please refer to the `LICENSE` file in the repository for information on licensing. If no `LICENSE` file is present, the code is likely proprietary or the license information has not yet been specified.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE.md) file for details.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

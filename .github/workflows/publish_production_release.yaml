@@ -1,0 +1,80 @@
+name: Publish Production Release
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  tag_and_publish_production_release:
+    name: Tag and Publish Production Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # To push production tags
+      packages: write # To push Docker packages
+    outputs:
+      new_production_tag: ${{ steps.tag_production.outputs.new_tag }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all tags and branches
+
+      - name: Configure Git User
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+
+      - name: Generate Incremented Production Tag
+        id: tag_production
+        run: |
+          git fetch --tags origin
+
+          LATEST_PRODUCTION_TAG_FULL=$(git tag --list 'production-v*' | sort -V | tail -n 1)
+          
+          if [ -z "$LATEST_PRODUCTION_TAG_FULL" ]; then
+            NEW_TAG_VERSION=1
+          else
+            LATEST_TAG_VERSION=$(echo "$LATEST_PRODUCTION_TAG_FULL" | sed 's/production-v//')
+            NEW_TAG_VERSION=$((LATEST_TAG_VERSION + 1))
+          fi
+          
+          NEW_TAG="production-v${NEW_TAG_VERSION}"
+          echo "New production tag: $NEW_TAG"
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+
+      - name: Push new production tag
+        run: |
+          NEW_PRODUCTION_TAG=${{ steps.tag_production.outputs.new_tag }}
+          git tag "$NEW_PRODUCTION_TAG" HEAD 
+          git push origin "$NEW_PRODUCTION_TAG"
+          echo "Pushed new production tag $NEW_PRODUCTION_TAG to commit $GITHUB_SHA"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/banknote_classifier # User should adjust 'banknote_classifier' if needed
+          tags: |
+            type=raw,value=${{ steps.tag_production.outputs.new_tag }}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./deployment # Changed context
+          file: ./deployment/Dockerfile # Changed path to Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

@@ -1,0 +1,56 @@
+name: Create Staging Tag
+
+on:
+  pull_request:
+    branches:
+      - master # PRs targeting the master branch
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  create_incremented_staging_tag:
+    name: Create Incremented Staging Tag
+    runs-on: ubuntu-latest
+    if: github.head_ref == 'dev' && github.base_ref == 'master'
+    permissions:
+      contents: write # Needed to push tags
+    outputs:
+      new_staging_tag: ${{ steps.tag_staging.outputs.new_tag }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all tags and branches
+
+      - name: Configure Git User
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+
+      - name: Generate Incremented Staging Tag
+        id: tag_staging
+        run: |
+          git fetch --tags origin 
+          
+          LATEST_STAGING_TAG_FULL=$(git tag --list 'staging-v*' | sort -V | tail -n 1)
+          
+          if [ -z "$LATEST_STAGING_TAG_FULL" ]; then
+            NEW_TAG_VERSION=1
+          else
+            # Extract number from staging-vN
+            LATEST_TAG_VERSION=$(echo "$LATEST_STAGING_TAG_FULL" | sed 's/staging-v//')
+            NEW_TAG_VERSION=$((LATEST_TAG_VERSION + 1))
+          fi
+          
+          NEW_TAG="staging-v${NEW_TAG_VERSION}"
+          echo "New staging tag: $NEW_TAG"
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+
+      - name: Push new staging tag
+        run: |
+          NEW_STAGING_TAG=${{ steps.tag_staging.outputs.new_tag }}
+          # Tag the commit at the head of the PR's source branch (dev)
+          git tag "$NEW_STAGING_TAG" "${{ github.event.pull_request.head.sha }}"
+          git push origin "$NEW_STAGING_TAG"
+          echo "Pushed new staging tag $NEW_STAGING_TAG to commit ${{ github.event.pull_request.head.sha }}"

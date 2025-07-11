@@ -65,7 +65,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 1.  **Clone the repository:**
     ```bash
-    git clone [<repository_url> # Replace <repository_url> with the actual URL](https://github.com/Muhammad-Abdelsattar/banknotes_classifier)
+    git clone https://github.com/Muhammad-Abdelsattar/banknotes_classifier
     cd banknotes_classifier
     ```
 
